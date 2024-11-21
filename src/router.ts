@@ -9,6 +9,12 @@ const router = createRouter({
             // lazy loading
             component: () => import('./views/login/index.vue')
         },
+        {
+            path: '/reg',
+            name: 'reg',
+            // lazy loading
+            component: () => import('./views/reg/index.vue')
+        }
     ]
 })
 

@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import {useUserInfoStore} from "../../store";
-import {loginAPI} from "../../api/users.ts";
+import {loginAPI} from "../../api/auth.ts";
 
 const userInfoStore = useUserInfoStore()
 
@@ -21,7 +21,7 @@ const rules = {
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { pattern: /^(?![a-zA-Z]+$)(?!\d+$)(?![^\da-zA-Z\s]+$).{6,32}$/, message: '密码必须是6-32的非空字符', trigger: 'blur' }
+    { pattern: /^(?![a-zA-Z]+$)(?!\d+$)(?![^\da-zA-Z\s]+$).{6,32}$/, message: '密码必须是6-32的数字+英文字符', trigger: 'blur' }
   ]
 }
 
