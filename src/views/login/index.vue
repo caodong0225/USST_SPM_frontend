@@ -35,13 +35,17 @@ const loginFn = async () => {
     const { data: res } = await loginAPI(form.value)
     console.log(res)
     // 登录失败，提示用户，这个提示已经在响应拦截器中统一处理了，这里直接return就行
-    if (res.code !== 0) {
+    if (res.code !== 200) {
       return false
     }
     // 登录成功，提示用户
     ElMessage.success('登录成功')
     // 把后端返回的当前登录用户信息(包括token)存储到Pinia里
-    userInfoStore.userInfo = res.data
+    if(userInfoStore.userInfo) {
+      userInfoStore.userInfo.id = res.user.id
+      userInfoStore.userInfo.nickname = res.user.nickname
+      // userInfoStore.userInfo.token = res.user.sessionId
+    }
     console.log(userInfoStore.userInfo)
     // 跳转到首页
     router.push('/')

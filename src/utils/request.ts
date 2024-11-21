@@ -16,14 +16,14 @@ instance.interceptors.request.use(
     (config) => {
         // config配置对象（要请求后台的参数都在这个对象上）
         // console.log('------请求拦截器-------')
-        const token = userInfoStore.userInfo ? userInfoStore.userInfo.token : null
+        // const token = userInfoStore.userInfo ? userInfoStore.userInfo.token : null
         // 在发起时要统一携带请求头Authorization和token值
         // 判断，登录和注册页面，pinia里无token，而且登录接口和注册接口也不需要携带token（其他页面需要——）
         // console.log('token:', token)
-        if (token) {
-            // 为请求头挂载 Authorization 字段
-            config.headers.Authorization = token
-        }
+        // if (token) {
+        //     // 为请求头挂载 Authorization 字段
+        //     config.headers.Authorization = token
+        // }
         return config
     },
     (error) => {
