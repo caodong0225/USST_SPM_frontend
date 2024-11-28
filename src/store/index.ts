@@ -8,7 +8,7 @@ import {UserInfo} from "../types/users";
 
 export const useUserInfoStore = defineStore('userInfo', {
     state: () => {
-        const userInfo = ref<UserInfo | null>(null)
+        const userInfo = ref<UserInfo>({ id: 0, nickname: '' }) // 提供默认值
         return { userInfo }
     },
     persist: true // 持久化存储

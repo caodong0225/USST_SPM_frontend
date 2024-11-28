@@ -4,6 +4,7 @@ import { ElMessageBox, ElMessage } from 'element-plus'
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { ElNotification } from 'element-plus'
 import {useUserInfoStore} from "../../store";
+import {loginAPI, logoutAPI} from "../../api/auth.ts";
 
 // ------ data ------
 const dialogFormVisible = ref(false)
@@ -14,37 +15,22 @@ const isCollapse = ref(false)
 const menuList = [
   {
     title: '首页',
-    path: '/dashboard',
+    path: '/home',
     icon: 'pieChart',
   },
   {
-    title: '数据统计',
-    path: '/statistics',
+    title: '我的课程',
+    path: '/courses',
     icon: 'memo',
   },
   {
-    title: '订单管理',
-    path: '/order',
-    icon: 'collection',
+    title: '公告', // 新增公告
+    path: '/announcements', // 新增路径
+    icon: 'notification', // 图标名称，根据 UI 框架的图标库选择
   },
   {
-    title: '分类管理',
-    path: '/category',
-    icon: 'postcard',
-  },
-  {
-    title: '套餐管理',
-    path: '/setmeal',
-    icon: 'user',
-  },
-  {
-    title: '菜品管理',
-    path: '/dish',
-    icon: 'dish',
-  },
-  {
-    title: '员工管理',
-    path: '/employee',
+    title: '个人设置',
+    path: '/setting',
     icon: 'setting',
   },
 ]
@@ -72,8 +58,8 @@ const rules = { // 表单的规则检验对象
   oldPwd: [
     { required: true, message: '请输入原密码', trigger: 'blur' },
     {
-      pattern: /^[a-zA-Z0-9]{1,10}$/,
-      message: '原密码必须是1-10的大小写字母数字',
+      pattern: /^[a-zA-Z0-9]{6,15}$/,
+      message: '原密码必须是6-15的大小写字母数字',
       trigger: 'blur'
     }
   ],
@@ -170,15 +156,19 @@ const quitFn = () => {
       type: 'warning',
     }
   )
-    .then(() => {
-      ElMessage({
-        type: 'success',
-        message: '退出成功',
-      })
-      // 清除用户信息，包括token
-      userInfoStore.userInfo = null
-      console.log(userInfoStore)
-      router.push('/login')
+    .then(async() => {
+      // 向后端发送退出登录请求
+      const { data: res } = await logoutAPI()
+      // 登录失败，提示用户，这个提示已经在响应拦截器中统一处理了，这里直接return就行
+      if (res.code == 200) {
+        // 清除用户信息，包括token
+        userInfoStore.userInfo = {id: 0, nickname: ''}
+        ElMessage({
+          type: 'success',
+          message: '退出成功',
+        })
+        router.push('/login')
+      }
     })
     .catch(() => {
       ElMessage({
@@ -213,11 +203,6 @@ const webSocket = () => {
     websocket.value.onmessage = (msg) => {
       // 解析服务器通过WebSocket发送的消息
       const jsonMsg = JSON.parse(msg.data)
-      if (jsonMsg.type === 1) {
-        audio1.value!.play()
-      } else if (jsonMsg.type === 2) {
-        audio2.value!.play()
-      }
     }
     websocket.value.onerror = () => {
       ElNotification({
@@ -293,6 +278,14 @@ onBeforeUnmount(() => {
             </el-dropdown-menu>
           </template>
         </el-dropdown>
+        <!-- 添加一个图标按钮 -->
+        <el-button
+            class="icon-btn"
+            icon="Bell"
+            circle
+            @click="handleNotificationClick"
+            style="float: right; margin-top: 14px;">
+        </el-button>
       </el-header>
       <el-container class="box1">
         <!-- 左侧导航菜单区域 -->

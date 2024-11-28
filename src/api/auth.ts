@@ -28,3 +28,13 @@ export const registerAPI = (params: any) => {
         data: { ...filteredParams }
     })
 }
+
+/**
+ * 退出登录接口
+ */
+export const logoutAPI = () => {
+    return request({
+        url: '/auth/logout',
+        method: 'post'
+    })
+}

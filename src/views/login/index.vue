@@ -41,11 +41,12 @@ const loginFn = async () => {
     // 登录成功，提示用户
     ElMessage.success('登录成功')
     // 把后端返回的当前登录用户信息(包括token)存储到Pinia里
-    if(userInfoStore.userInfo) {
-      userInfoStore.userInfo.id = res.user.id
-      userInfoStore.userInfo.nickname = res.user.nickname
-      // userInfoStore.userInfo.token = res.user.sessionId
+    if (!userInfoStore.userInfo) {
+      userInfoStore.userInfo = { id: 0, nickname: '' } // 初始化一个默认对象
     }
+    userInfoStore.userInfo.id = res.user.id
+    userInfoStore.userInfo.nickname = res.user.nickname
+    // userInfoStore.userInfo.token = res.user.sessionId
     console.log(userInfoStore.userInfo)
     // 跳转到首页
     router.push('/')
