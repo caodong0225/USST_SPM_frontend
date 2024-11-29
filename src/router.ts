@@ -14,6 +14,11 @@ const router = createRouter({
                     // lazy loading
                     component: () => import('./views/home/index.vue')
                 },
+                {
+                    path: 'settings',
+                    name: 'settings',
+                    component: () => import('./views/settings/index.vue')
+                }
             ]
         },
         {
