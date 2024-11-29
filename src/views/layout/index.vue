@@ -30,7 +30,7 @@ const menuList = [
   },
   {
     title: '个人设置',
-    path: '/setting',
+    path: '/settings',
     icon: 'setting',
   },
 ]

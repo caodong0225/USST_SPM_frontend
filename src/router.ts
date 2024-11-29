@@ -6,6 +6,15 @@ const router = createRouter({
         {
             path: '/',
             component: () => import('./views/layout/index.vue'),
+            redirect: '/home', // 将dashboard设为首页home
+            children: [
+                {
+                    path: 'home',
+                    name: 'home',
+                    // lazy loading
+                    component: () => import('./views/home/index.vue')
+                },
+            ]
         },
         {
             path: '/login',
