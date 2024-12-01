@@ -18,7 +18,12 @@ const router = createRouter({
                     path: 'settings',
                     name: 'settings',
                     component: () => import('./views/settings/index.vue')
-                }
+                },
+                {
+                    path: 'courses',
+                    name: 'courses',
+                    component: () => import('./views/courses/index.vue')
+                },
             ]
         },
         {
