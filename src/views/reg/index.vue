@@ -1,17 +1,17 @@
 <script setup lang="ts" name:="my-register" xmlns:name="http://www.w3.org/1999/xhtml">
 // 导出是命名导出，所以这里导入要加{}
-import { registerAPI } from '../../api/auth.ts'
-import { useRouter } from 'vue-router'
-import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import {registerAPI} from '../../api/auth.ts'
+import {useRouter} from 'vue-router'
+import {ref} from 'vue'
+import {ElMessage} from 'element-plus'
 
-const form = ref({ // 表单的数据对象
-  username: '', // 用户名
-  password: '', // 密码
-  repassword: '', // 确认密码
-  email: '', // 邮箱
-  nickname: '' // 昵称
-})
+const form = ref<{ username: string; password: string; repassword?: string; email: string; nickname: string }>({
+  username: '',
+  password: '',
+  repassword: '',
+  email: '',
+  nickname: '',
+});
 // 表单校验的ref
 const registerRef = ref()
 
@@ -28,7 +28,7 @@ const samePwd = (rules: any, value: any, callback: any) => {
 }
 const rules = { // 表单的规则检验对象
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
+    {required: true, message: '请输入用户名', trigger: 'blur'},
     {
       pattern: /^[a-zA-Z0-9]{3,20}$/,
       message: '用户名必须是3-20的字母数字',
@@ -36,7 +36,7 @@ const rules = { // 表单的规则检验对象
     }
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
+    {required: true, message: '请输入密码', trigger: 'blur'},
     {
       pattern: /^(?![a-zA-Z]+$)(?!\d+$)(?![^\da-zA-Z\s]+$).{6,32}$/,
       message: '密码必须是6-32的数字+英文字符',
@@ -44,17 +44,21 @@ const rules = { // 表单的规则检验对象
     }
   ],
   repassword: [
-    { required: true, message: '请再次输入密码', trigger: 'blur' },
-    { pattern: /^(?![a-zA-Z]+$)(?!\d+$)(?![^\da-zA-Z\s]+$).{6,32}$/, message: '密码必须是6-32的数字+英文字符', trigger: 'blur' },
-    { validator: samePwd, trigger: 'blur' }
+    {required: true, message: '请再次输入密码', trigger: 'blur'},
+    {
+      pattern: /^(?![a-zA-Z]+$)(?!\d+$)(?![^\da-zA-Z\s]+$).{6,32}$/,
+      message: '密码必须是6-32的数字+英文字符',
+      trigger: 'blur'
+    },
+    {validator: samePwd, trigger: 'blur'}
   ],
-  email:[
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { pattern: /^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/, message: '邮箱格式不正确', trigger: 'blur' }
+  email: [
+    {required: true, message: '请输入邮箱', trigger: 'blur'},
+    {pattern: /^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/, message: '邮箱格式不正确', trigger: 'blur'}
   ],
-  nickname:[
-    { required: true, message: '请输入昵称', trigger: 'blur' },
-    { pattern: /^.{1,20}$/, message: '昵称长度必须是1-20范围', trigger: 'blur' }
+  nickname: [
+    {required: true, message: '请输入昵称', trigger: 'blur'},
+    {pattern: /^.{1,20}$/, message: '昵称长度必须是1-20范围', trigger: 'blur'}
   ]
 }
 
@@ -67,8 +71,9 @@ const registerFn = async () => {
     // 通过校验，拿到绑定的数据
     console.log('注册的表单ref:  ', registerRef)
     console.log('form.value:  ', form.value)
+    delete form.value.repassword // 删除确认密码字段
     // 1.调用注册接口，通过接口的return request，拿到promise对象
-    const { data: res } = await registerAPI(form.value)
+    const {data: res} = await registerAPI(form.value)
     console.log(res)
     // 2.注册失败，响应拦截器已经ElMessage提示用户，这里直接返回
     if (res.code !== 200) {
@@ -219,10 +224,8 @@ body {
   margin: 0 4px;
   border-radius: 50%;
   box-shadow: 0 0 10px 5px rgba(238, 238, 238, 0.5),
-    /* 微调颜色和透明度 */
-    0 0 30px 15px rgba(238, 238, 238, 0.3),
-    /* 模糊半径和扩散范围 */
-    0 0 50px 30px rgba(221, 221, 221, 0.2);
+    /* 微调颜色和透明度 */ 0 0 30px 15px rgba(238, 238, 238, 0.3),
+    /* 模糊半径和扩散范围 */ 0 0 50px 30px rgba(221, 221, 221, 0.2);
   animation: animate 15s linear infinite;
   animation-duration: calc(200s / var(--i));
 }
@@ -231,9 +234,8 @@ body {
   background: #ff8800;
   /* 橙色调 */
   box-shadow: 0 0 10px 5px rgba(255, 150, 50, 0.5),
-    /* 颜色和透明度 */
-    0 0 30px 15px rgba(200, 100, 50, 0.3),
-    0 0 50px 30px rgba(200, 50, 50, 0.1);
+    /* 颜色和透明度 */ 0 0 30px 15px rgba(200, 100, 50, 0.3),
+  0 0 50px 30px rgba(200, 50, 50, 0.1);
 }
 
 

@@ -1,40 +1,45 @@
-import request from '../utils/request' // 引入自定义的axios函数
+import request from '../utils/request'
+import {loginDTO} from "../model/dto/LoginDTO.ts";
+import {registerDTO} from "../model/dto/RegisterDTO.ts";
+import {LoginDataResponseVO} from "../model/response/BaseResponse.ts";
+import {AxiosResponse} from "axios";
+import {BaseDataResponse} from "../model/response/BaseDataResponse.ts";
+import {GeneralDataResponse} from "../model/response/GeneralDataRespons.ts";
+import {UsersVO} from "../model/vo/UsersVO.ts"; // 引入自定义的axios函数
 
 /**
- * 登录接口（这是JSDoc注释）
- * @param {*} param0 {username: 用户名, password: 密码}
- * @returns Promise对象
+ * 登录接口
+ * @param params 登录的 DTO 对象
+ * @returns 返回一个包含 BaseResponse 的 Promise
  */
-export const loginAPI = (params: any) => {
-    return request({
+export const loginAPI = (params: loginDTO): Promise<AxiosResponse<LoginDataResponseVO>> => {
+    return request<LoginDataResponseVO>({
         url: '/auth/login',
         method: 'post',
-        data: { ...params }
-    })
-}
+        data: { ...params },
+    });
+};
 
 /**
  * 注册接口
- * @param params 注册的DTO对象
- * @returns
+ * @param params 注册的 DTO 对象
+ * @returns 返回一个包含 BaseResponse 的 Promise
  */
-export const registerAPI = (params: any) => {
-    const { repassword, ...filteredParams } = params; // 移除 repassword 属性
-    console.log(filteredParams); // 打印移除后的对象
-    delete params.repassword; // 删除 repassword 属性
-    return request({
+export const registerAPI = (params: registerDTO): Promise<AxiosResponse<GeneralDataResponse<UsersVO>>> => {
+    return request<GeneralDataResponse<UsersVO>>({
         url: '/auth/register',
         method: 'post',
-        data: { ...filteredParams }
-    })
-}
+        data: { ...params },
+    });
+};
 
 /**
  * 退出登录接口
+ * @returns 返回一个包含 BaseResponse 的 Promise
  */
-export const logoutAPI = () => {
-    return request({
+export const logoutAPI = (): Promise<AxiosResponse<BaseDataResponse>> => {
+    return request<BaseDataResponse>({
         url: '/auth/logout',
-        method: 'post'
-    })
-}
+        method: 'post',
+    });
+};

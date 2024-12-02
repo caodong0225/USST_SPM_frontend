@@ -9,18 +9,18 @@
       />
     </div>
     <div class="content-container">
-      <h2 class="course-title">课程名称</h2>
+      <h2 class="course-title">{{title}}</h2>
       <div class="course-details">
         <div class="detail-row">
           <span class="detail-label">开课：</span>
-          <span class="detail-value">开课时间</span>
+          <span class="detail-value">{{startTime}}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">课程状态：</span>
-          <span class="detail-value">课程状态</span>
+          <span class="detail-value">{{status}}</span>
         </div>
       </div>
-      <p class="course-description">课程描述...</p>
+      <p class="course-description">{{description}}</p>
     </div>
   </article>
 </template>
@@ -41,23 +41,27 @@ export default defineComponent({
   props: {
     title: {
       type: String,
-      required: true
+      required: true,
+      default: "课程标题"
     },
     startTime: {
       type: String,
-      required: true
+      required: true,
+      default: "2024-11-29"
     },
     status: {
       type: String,
-      required: true
+      required: true,
+      default: "开课中"
     },
     description: {
       type: String,
-      required: true
+      required: true,
+      default: "课程描述"
     },
     imageUrl: {
       type: String,
-      required: true
+      required: true,
     }
   }
 })

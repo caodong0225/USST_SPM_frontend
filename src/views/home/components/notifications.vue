@@ -12,11 +12,11 @@
         </div>
       </div>
       <div class="notification-meta">
-        <h2 class="notification-title">公告发布</h2>
-        <time class="notification-date">2024-11-29</time>
+        <h2 class="notification-title">{{title}}</h2>
+        <time class="notification-date">{{date}}</time>
       </div>
     </div>
-    <p class="notification-content">消息内容</p>
+    <p class="notification-content">{{content}}</p>
   </article>
 </template>
 

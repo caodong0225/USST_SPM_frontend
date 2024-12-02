@@ -1,13 +1,13 @@
 <template>
   <article class="announcement-card">
-    <h1 class="announcement-title">公告标题</h1>
+    <h1 class="announcement-title">{{title}}</h1>
     <div class="announcement-meta">
-      <span class="course-name">课程名称</span>
-      <time class="creation-time">创建时间</time>
-      <span class="teacher-name">教师姓名</span>
+      <span class="course-name">{{courseName}}</span>
+      <time class="creation-time">{{createdAt}}</time>
+      <span class="teacher-name">{{teacherName}}</span>
       <div class="meta-content"></div>
     </div>
-    <p class="announcement-content">消息内容...</p>
+    <p class="announcement-content">{{content}}</p>
   </article>
 </template>
 
