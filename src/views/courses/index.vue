@@ -6,13 +6,12 @@
 
     <div class="courses-container">
       <CourseCard
-          v-for="course in paginatedCourses"
-          :key="course.id"
-          :title="course.title"
+          v-for="course in courses"
+          :title="course.courseName"
           :startTime="course.startTime"
           :status="course.status"
-          :description="course.description"
-          :imageUrl="course.imageUrl"
+          :description="course.courseDesc"
+          :imageUrl="course.coursePic"
       />
     </div>
 
@@ -23,7 +22,7 @@
           :current-page="currentPage"
           :page-size="itemsPerPage"
           :page-sizes="[5, 10, 15, 20]"
-          :total="courses.length"
+          :total="totalNum"
           @size-change="onPageSizeChange"
           @current-change="onPageChange"
       />
@@ -41,19 +40,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref } from "vue";
+import { defineComponent, ref } from "vue";
 import CourseCard from "./components/courses.vue";
 import { ElPagination, ElSelect, ElOption } from "element-plus";
-
-// 定义课程数据的接口
-interface Course {
-  id: number;
-  title: string;
-  startTime: string;
-  status: string;
-  description: string;
-  imageUrl: string;
-}
+import {getUserCoursesPage} from "../../api/course.ts";
 
 export default defineComponent({
   name: "CoursesList",
@@ -65,43 +55,41 @@ export default defineComponent({
   },
   setup() {
     // 模拟课程数据
-    const courses = ref<Course[]>(Array.from({ length: 50 }, (_, i) => ({
-      id: i + 1,
-      title: `课程 ${i + 1}`,
-      startTime: `2024-12-0${(i % 10) + 1}`,
-      status: i % 2 === 0 ? "开放" : "已结束",
-      description: `这是课程 ${i + 1} 的描述信息`,
-      imageUrl:
-          "https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F72c80f114dc149019051b6852a9e3b7a",
-    })));
+    const courses = ref<any[]>([]);
+    const totalNum = ref(0);
 
     // 分页状态
     const currentPage = ref(1);
     const itemsPerPage = ref(10);
 
-    // 计算分页后的课程列表
-    const paginatedCourses = computed(() => {
-      const start = (currentPage.value - 1) * itemsPerPage.value;
-      const end = start + itemsPerPage.value;
-      return courses.value.slice(start, end);
-    });
-
     // 修改每页条数
     const onPageSizeChange = (size: number) => {
       itemsPerPage.value = size;
       currentPage.value = 1; // 重新调整为第一页
+      fetchCourses();
     };
 
     // 修改当前页码
     const onPageChange = (page: number) => {
       currentPage.value = page;
+      fetchCourses();
     };
 
+    // 向后端发送请求获取课程数据
+    const fetchCourses = async () => {
+      const res = await getUserCoursesPage(
+        currentPage.value,
+        itemsPerPage.value
+      );
+      totalNum.value = res.data.total;
+      courses.value = res.data.records;
+    };
+    fetchCourses();
     return {
       courses,
       currentPage,
       itemsPerPage,
-      paginatedCourses,
+      totalNum,
       onPageSizeChange,
       onPageChange,
     };

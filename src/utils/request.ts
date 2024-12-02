@@ -20,11 +20,12 @@ instance.interceptors.request.use(
 // 响应拦截器
 instance.interceptors.response.use(
     (response) => {
-        console.log(response);
         // 检查响应数据中的 `code`，统一处理非 200 的情况
         if ('code' in response.data && response.data.code !== 200) {
             ElMessage.error(response.data.message);
+            return Promise.reject(response.data);
         }
+        console.log(response);
         // 返回响应的 data 部分，而不是整个 AxiosResponse
         return response.data;
     },

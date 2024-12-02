@@ -15,8 +15,8 @@ export type UsersVO = {
     nickname: string;
 
     /** 邮箱 */
-    email: string;
+    email?: string;
 
     /** 手机号码 */
-    phone: string;
+    phone?: string;
 }

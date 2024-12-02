@@ -37,7 +37,7 @@ export const registerAPI = (params: registerDTO): Promise<AxiosResponse<GeneralD
  * 退出登录接口
  * @returns 返回一个包含 BaseResponse 的 Promise
  */
-export const logoutAPI = (): Promise<AxiosResponse<BaseDataResponse>> => {
+export const logoutAPI = () => {
     return request<BaseDataResponse>({
         url: '/auth/logout',
         method: 'post',

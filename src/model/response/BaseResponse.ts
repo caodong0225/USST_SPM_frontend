@@ -7,10 +7,13 @@ export interface BaseResponse {
     message: string;
 }
 
-export interface LoginDataResponseVO extends BaseResponse {
+export type LoginDataResponseVO = {
+    /** 响应状态码 */
+    code: number;
+    /** 响应消息 */
+    message: string;
     /** 会话ID */
     sessionId: string;
-
     /** 用户信息 */
     user: UsersVO;
 }

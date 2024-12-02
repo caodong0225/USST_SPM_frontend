@@ -32,25 +32,21 @@ const loginFn = async () => {
   const valid = await loginRef.value.validate()
   if (valid) {
     // 调用登录接口
-    const { data: res } = await loginAPI(form.value)
-    console.log(res)
-    // 登录失败，提示用户，这个提示已经在响应拦截器中统一处理了，这里直接return就行
-    if (res.code !== 200) {
-      return false
-    }
-    // 登录成功，提示用户
-    ElMessage.success('登录成功')
+    const response = await loginAPI(form.value)
+    console.log(response)
     // 把后端返回的当前登录用户信息(包括token)存储到Pinia里
     if (!userInfoStore.userInfo) {
       userInfoStore.userInfo = { id: 0, nickname: '', role: '' } // 初始化一个默认对象
     }
-    userInfoStore.userInfo.id = res.user.id
-    userInfoStore.userInfo.nickname = res.user.nickname
+    userInfoStore.userInfo.id = response.user.id
+    userInfoStore.userInfo.nickname = response.user.nickname
     // TODO: 用户权限信息没有存入pinia中
     // userInfoStore.userInfo.token = res.user.sessionId
+    // 登录成功，提示用户
+    ElMessage.success('登录成功')
     console.log(userInfoStore.userInfo)
     // 跳转到首页
-    router.push('/')
+    await router.push('/')
   } else {
     return false
   }

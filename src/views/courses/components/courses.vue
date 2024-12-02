@@ -41,27 +41,23 @@ export default defineComponent({
   props: {
     title: {
       type: String,
-      required: true,
-      default: "课程标题"
+      required: true
     },
     startTime: {
       type: String,
-      required: true,
-      default: "2024-11-29"
+      required: true
     },
     status: {
       type: String,
-      required: true,
-      default: "开课中"
+      required: true
     },
     description: {
       type: String,
-      required: true,
-      default: "课程描述"
+      required: true
     },
     imageUrl: {
       type: String,
-      required: true,
+      required: true
     }
   }
 })

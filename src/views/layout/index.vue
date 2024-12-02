@@ -158,9 +158,10 @@ const quitFn = () => {
   )
     .then(async() => {
       // 向后端发送退出登录请求
-      const { data: res } = await logoutAPI()
-      // 登录失败，提示用户，这个提示已经在响应拦截器中统一处理了，这里直接return就行
-      if (res.code == 200) {
+      const response = await logoutAPI()
+      if(response.code == 200)
+      {
+        // 登录失败，提示用户，这个提示已经在响应拦截器中统一处理了，这里直接return就行
         // 清除用户信息，包括token
         userInfoStore.userInfo = {id: 0, nickname: '', role: ''}
         ElMessage({
