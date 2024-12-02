@@ -11,5 +11,9 @@ export const useUserInfoStore = defineStore('userInfo', {
         const userInfo = ref<UserInfo>({ id: 0, nickname: '', role: 0, sessionId: '' }) // 提供默认值
         return { userInfo }
     },
+    getters: {
+        // 检查是否登录的辅助方法
+        isLoggedIn: (state) => !!state.userInfo.sessionId && state.userInfo.id > 0
+    },
     persist: true // 持久化存储
 })

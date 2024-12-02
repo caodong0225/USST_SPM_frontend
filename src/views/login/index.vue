@@ -53,8 +53,6 @@ const loginFn = async () => {
       }
     }
     userInfoStore.userInfo.sessionId = response.sessionId
-    // TODO: 用户权限信息没有存入pinia中
-    // userInfoStore.userInfo.token = res.user.sessionId
     // 登录成功，提示用户
     ElMessage.success('登录成功')
     console.log(userInfoStore.userInfo)

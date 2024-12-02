@@ -5,7 +5,10 @@
     </header>
 
     <div class="courses-container">
+      <!--如果没有课程数据，则显示none.vue组件信息-->
+      <None v-if="totalNum < 1" />
       <CourseCard
+          v-else
           v-for="course in courses"
           :title="course.courseName"
           :startTime="course.startTime"
@@ -121,5 +124,6 @@ export default defineComponent({
 .page-size-selector {
   display: flex;
   align-items: center;
+  width: 120px;
 }
 </style>

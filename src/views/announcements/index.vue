@@ -129,5 +129,6 @@ export default defineComponent({
 .page-size-selector {
   display: flex;
   align-items: center;
+  width: 120px;
 }
 </style>
