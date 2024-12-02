@@ -42,10 +42,11 @@ const loginFn = async () => {
     ElMessage.success('登录成功')
     // 把后端返回的当前登录用户信息(包括token)存储到Pinia里
     if (!userInfoStore.userInfo) {
-      userInfoStore.userInfo = { id: 0, nickname: '' } // 初始化一个默认对象
+      userInfoStore.userInfo = { id: 0, nickname: '', role: '' } // 初始化一个默认对象
     }
     userInfoStore.userInfo.id = res.user.id
     userInfoStore.userInfo.nickname = res.user.nickname
+    // TODO: 用户权限信息没有存入pinia中
     // userInfoStore.userInfo.token = res.user.sessionId
     console.log(userInfoStore.userInfo)
     // 跳转到首页

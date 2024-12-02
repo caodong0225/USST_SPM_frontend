@@ -162,7 +162,7 @@ const quitFn = () => {
       // 登录失败，提示用户，这个提示已经在响应拦截器中统一处理了，这里直接return就行
       if (res.code == 200) {
         // 清除用户信息，包括token
-        userInfoStore.userInfo = {id: 0, nickname: ''}
+        userInfoStore.userInfo = {id: 0, nickname: '', role: ''}
         ElMessage({
           type: 'success',
           message: '退出成功',

@@ -4,7 +4,7 @@ import {registerDTO} from "../model/dto/RegisterDTO.ts";
 import {LoginDataResponseVO} from "../model/response/BaseResponse.ts";
 import {AxiosResponse} from "axios";
 import {BaseDataResponse} from "../model/response/BaseDataResponse.ts";
-import {GeneralDataResponse} from "../model/response/GeneralDataRespons.ts";
+import {GeneralDataResponse} from "../model/response/GeneralDataResponse.ts";
 import {UsersVO} from "../model/vo/UsersVO.ts"; // 引入自定义的axios函数
 
 /**
