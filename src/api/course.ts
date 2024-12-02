@@ -14,3 +14,15 @@ export const getUserCoursesPage = (pageNum?: number, pageSize?: number): Promise
         method: 'get'
     });
 };
+
+/**
+ * 获取课程详情接口
+ * @param courseId 课程 ID
+ * @returns 返回一个包含课程详情的 Promise
+ */
+export const getCourseDetail = (courseId: number): Promise<AxiosResponse<UserCoursesVO>> => {
+    return request({
+        url: `/course/get/${courseId}`,
+        method: 'get'
+    });
+}

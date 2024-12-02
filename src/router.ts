@@ -36,6 +36,18 @@ const router = createRouter({
             ]
         },
         {
+            path: '/course/detail/:id',
+            name: 'CourseDetail',
+            component: () => import('./views/courses/courseDetail.vue'), // 替换为实际的课程详情组件路径
+            meta: { requiresAuth: true }
+        },
+        {
+            path: '/courses/add',
+            name: 'addCourse',
+            component: () => import('./views/courses/addCourse.vue'), // 替换为实际的课程详情组件路径
+            meta: { requiresAuth: true }
+        },
+        {
             path: '/login',
             name: 'login',
             component: () => import('./views/login/index.vue')

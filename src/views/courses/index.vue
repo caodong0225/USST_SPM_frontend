@@ -1,7 +1,11 @@
 <template>
   <section class="courses-list">
     <header>
-      <h1>课程列表</h1>
+      <div class="header-container">
+        <h1 class="header-title">课程列表</h1>
+        <!-- 如果是管理员，则显示添加课程按钮 -->
+        <el-button type="primary" @click="goToAddCourse" v-if="isAdmin" class="add-course-btn">添加课程</el-button>
+      </div>
     </header>
 
     <div class="courses-container">
@@ -10,6 +14,8 @@
       <CourseCard
           v-else
           v-for="course in courses"
+          :key="course.id"
+          :id="course.id"
           :title="course.courseName"
           :startTime="course.startTime"
           :status="course.status"
@@ -47,9 +53,15 @@ import { defineComponent, ref } from "vue";
 import CourseCard from "./components/courses.vue";
 import { ElPagination, ElSelect, ElOption } from "element-plus";
 import {getUserCoursesPage} from "../../api/course.ts";
+import {useUserInfoStore} from "../../store";
 
 export default defineComponent({
   name: "CoursesList",
+  methods: {
+    goToAddCourse(): void {
+      this.$router.push(`/courses/add`);
+    },
+  },
   components: {
     CourseCard,
     ElPagination,
@@ -60,6 +72,12 @@ export default defineComponent({
     // 模拟课程数据
     const courses = ref<any[]>([]);
     const totalNum = ref(0);
+    const isAdmin = ref(false);
+    // 获取useUserInfoStore来判断是否是管理员
+    const userInfoStore = useUserInfoStore();
+    if (userInfoStore.userInfo.role > 0) {
+      isAdmin.value = true;
+    }
 
     // 分页状态
     const currentPage = ref(1);
@@ -87,12 +105,14 @@ export default defineComponent({
       totalNum.value = res.data.total;
       courses.value = res.data.records;
     };
+
     fetchCourses();
     return {
       courses,
       currentPage,
       itemsPerPage,
       totalNum,
+      isAdmin,
       onPageSizeChange,
       onPageChange,
     };
@@ -101,6 +121,22 @@ export default defineComponent({
 </script>
 
 <style scoped>
+
+.header-container {
+  display: flex;
+  align-items: center; /* 垂直居中 */
+  justify-content: space-between; /* 两端对齐 */
+  padding: 0 20px; /* 根据需要调整内边距 */
+}
+
+.header-title {
+  margin: 0; /* 去掉默认外边距 */
+}
+
+.add-course-btn {
+  margin-left: auto; /* 保证按钮靠右 */
+}
+
 .courses-list {
   padding: 20px;
 }

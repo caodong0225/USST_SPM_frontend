@@ -54,7 +54,7 @@ export default defineComponent({
   name: 'CourseDetails',
   methods: {
     goBack(): void {
-      window.history.back()
+      this.$router.push(`/courses`); // 跳转到课程详情页
     }
   }
 })

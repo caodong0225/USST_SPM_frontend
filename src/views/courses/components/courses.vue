@@ -1,5 +1,5 @@
 <template>
-  <article class="course-card">
+  <article class="course-card" @click="navigateTo">
     <div class="image-container">
       <img
           loading="lazy"
@@ -27,18 +27,14 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-
-interface CourseCardProps {
-  title: string
-  startTime: string
-  status: string
-  description: string
-  imageUrl: string
-}
-
+import {useRouter} from "vue-router";
 export default defineComponent({
   name: 'CourseCard',
   props: {
+    id: {
+      type: Number,
+      required: true
+    },
     title: {
       type: String,
       required: true
@@ -59,6 +55,17 @@ export default defineComponent({
       type: String,
       required: true
     }
+  },
+  setup(props) {
+    const router = useRouter();
+
+    const navigateTo = () => {
+      router.push(`/course/detail/${props.id}`); // 跳转到课程详情页
+    };
+
+    return {
+      navigateTo
+    };
   }
 })
 </script>
