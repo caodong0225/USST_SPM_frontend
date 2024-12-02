@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import {useRouter} from 'vue-router'
+import {ref} from 'vue'
+import {ElMessage} from 'element-plus'
 import {useUserInfoStore} from "../../store";
 import {loginAPI} from "../../api/auth.ts";
 
@@ -16,12 +16,16 @@ const loginRef = ref()
 
 const rules = {
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { pattern: /^[a-zA-Z0-9]{3,20}$/, message: '用户名必须是3-20的字母数字', trigger: 'blur' }
+    {required: true, message: '请输入用户名', trigger: 'blur'},
+    {pattern: /^[a-zA-Z0-9]{3,20}$/, message: '用户名必须是3-20的字母数字', trigger: 'blur'}
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { pattern: /^(?![a-zA-Z]+$)(?!\d+$)(?![^\da-zA-Z\s]+$).{6,32}$/, message: '密码必须是6-32的数字+英文字符', trigger: 'blur' }
+    {required: true, message: '请输入密码', trigger: 'blur'},
+    {
+      pattern: /^(?![a-zA-Z]+$)(?!\d+$)(?![^\da-zA-Z\s]+$).{6,32}$/,
+      message: '密码必须是6-32的数字+英文字符',
+      trigger: 'blur'
+    }
   ]
 }
 
@@ -32,14 +36,23 @@ const loginFn = async () => {
   const valid = await loginRef.value.validate()
   if (valid) {
     // 调用登录接口
-    const response = await loginAPI(form.value)
+    const {data: response} = await loginAPI(form.value)
     console.log(response)
     // 把后端返回的当前登录用户信息(包括token)存储到Pinia里
     if (!userInfoStore.userInfo) {
-      userInfoStore.userInfo = { id: 0, nickname: '', role: '' } // 初始化一个默认对象
+      userInfoStore.userInfo = {id: 0, nickname: '', role: 0, sessionId: ''} // 初始化一个默认对象
     }
-    userInfoStore.userInfo.id = response.user.id
-    userInfoStore.userInfo.nickname = response.user.nickname
+    userInfoStore.userInfo.id = response.users.id
+    userInfoStore.userInfo.nickname = response.users.nickname
+    for (let role of response.roles) {
+      if (role === 'super-admin') {
+        userInfoStore.userInfo.role = 2
+        break
+      } else if (role === 'teacher') {
+        userInfoStore.userInfo.role = 1
+      }
+    }
+    userInfoStore.userInfo.sessionId = response.sessionId
     // TODO: 用户权限信息没有存入pinia中
     // userInfoStore.userInfo.token = res.user.sessionId
     // 登录成功，提示用户
@@ -171,9 +184,7 @@ body {
   background-color: #eee;
   margin: 0 4px;
   border-radius: 50%;
-  box-shadow: 0 0 10px 5px rgba(238, 238, 238, 0.5), /* 微调颜色和透明度 */
-  0 0 30px 15px rgba(238, 238, 238, 0.3), /* 模糊半径和扩散范围 */
-  0 0 50px 30px rgba(221, 221, 221, 0.2);
+  box-shadow: 0 0 10px 5px rgba(238, 238, 238, 0.5), /* 微调颜色和透明度 */ 0 0 30px 15px rgba(238, 238, 238, 0.3), /* 模糊半径和扩散范围 */ 0 0 50px 30px rgba(221, 221, 221, 0.2);
   animation: animate 15s linear infinite;
   animation-duration: calc(200s / var(--i));
 }
@@ -182,8 +193,7 @@ body {
   background: #ff8800;
   /* 橙色调 */
   box-shadow: 0 0 10px 5px rgba(255, 150, 50, 0.5),
-    /* 颜色和透明度 */
-  0 0 30px 15px rgba(200, 100, 50, 0.3),
+    /* 颜色和透明度 */ 0 0 30px 15px rgba(200, 100, 50, 0.3),
   0 0 50px 30px rgba(200, 50, 50, 0.1);
 }
 
@@ -229,7 +239,7 @@ body {
     width: 100%;
   }
 
-  .el-link{
+  .el-link {
     margin-top: 25px;
   }
 }
