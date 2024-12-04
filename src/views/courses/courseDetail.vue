@@ -3,13 +3,13 @@
     <header class="course-header">
       <nav class="navigation">
         <button class="back-button" @click="goBack" tabindex="0">&lt;返回</button>
-        <h1 class="course-title">{{courseInfo?.course.courseName}}}</h1>
+        <h1 class="course-title">{{courseInfo?.course.courseName}}</h1>
       </nav>
       <section class="instructor-section">
         <h2 class="instructor-label">授课教师</h2>
         <img
             loading="lazy"
-            src="https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F72c80f114dc149019051b6852a9e3b7a"
+            :src="courseInfo?.picture"
             class="instructor-avatar"
             alt="授课教师头像"
         />
@@ -127,7 +127,7 @@ export default defineComponent({
 
 .instructor-label {
   height: auto;
-  width: 80px;
+  width: 100px;
   margin: auto 0;
 }
 

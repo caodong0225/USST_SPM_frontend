@@ -22,11 +22,18 @@
         <el-button
             type="button"
             class="upload-button"
-            @click="handleImageUpload"
+            @click="triggerFileInput"
             tabindex="0"
         >
           上传图片
         </el-button>
+        <input
+            type="file"
+            ref="fileInput"
+            accept="image/*"
+            @change="handleImageUpload"
+            class="visually-hidden"
+        />
       </div>
       <img
           :src="formData.coursePic? formData.coursePic:'https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F72c80f114dc149019051b6852a9e3b7a'"
@@ -106,17 +113,45 @@ export default defineComponent({
         ElMessage.success('创建成功');
       } catch (error) {
         console.error(error);
+        ElMessage.error('创建失败，请重试');
       }
     };
 
-    const handleImageUpload = () => {
+    const triggerFileInput = () => {
+      // Trigger the file input click event
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+      fileInput?.click()
+    }
+
+    const handleImageUpload = (event: Event): void => {
       // Image upload logic would go here
+      const fileInput = event.target as HTMLInputElement
+      const file = fileInput.files?.[0]
+
+      if (file) {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          if (e.target) {
+            // Set the base64 encoded image to the avatarBase64 variable
+            const pic = e.target.result as string
+            try {
+              formData.value.coursePic = pic
+              ElMessage.success('头像上传成功')
+            } catch (error) {
+              // 处理上传失败的情况
+              ElMessage.error('头像上传失败，请重试')
+            }
+          }
+        }
+        reader.readAsDataURL(file) // Read the file and convert it to base64
+      }
     };
 
     return {
       formData,
       createCourse,
-      handleImageUpload
+      handleImageUpload,
+      triggerFileInput
     };
   }
 });
@@ -180,7 +215,7 @@ export default defineComponent({
 .cover-image {
   width: 200px;
   height: 200px;
-  object-fit: cover;
+  object-fit: contain;
   margin: 20px 0 0 80px;
 }
 

@@ -3,7 +3,7 @@
     <div class="image-container">
       <img
           loading="lazy"
-          src="https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F72c80f114dc149019051b6852a9e3b7a"
+          :src=imageUrl
           class="course-image"
           alt="Course thumbnail"
       />
@@ -32,7 +32,7 @@ export default defineComponent({
   name: 'CourseCard',
   props: {
     id: {
-      type: Number,
+      type: String,
       required: true
     },
     title: {

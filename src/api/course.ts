@@ -21,7 +21,7 @@ export const getUserCoursesPage = (pageNum?: number, pageSize?: number): Promise
  * @param courseId 课程 ID
  * @returns 返回一个包含课程详情的 Promise
  */
-export const getCourseDetail = (courseId: number): Promise<AxiosResponse<UserCoursesVO>> => {
+export const getCourseDetail = (courseId: number) => {
     return request({
         url: `/course/get/${courseId}`,
         method: 'get'

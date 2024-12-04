@@ -14,8 +14,8 @@
       <CourseCard
           v-else
           v-for="course in courses"
-          :key="course.id"
-          :id="course.id"
+          :key="course.courseId"
+          :id="course.courseId"
           :title="course.courseName"
           :startTime="course.startTime"
           :status="course.status"
