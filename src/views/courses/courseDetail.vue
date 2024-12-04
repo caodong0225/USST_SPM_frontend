@@ -3,7 +3,7 @@
     <header class="course-header">
       <nav class="navigation">
         <button class="back-button" @click="goBack" tabindex="0">&lt;返回</button>
-        <h1 class="course-title">课程名称</h1>
+        <h1 class="course-title">{{courseInfo?.course.courseName}}}</h1>
       </nav>
       <section class="instructor-section">
         <h2 class="instructor-label">授课教师</h2>
@@ -39,22 +39,45 @@
     </header>
     <nav class="course-navigation">
       <ul class="navigation-list">
-        <li><button class="nav-item" tabindex="0">测试</button></li>
-        <li><button class="nav-item" tabindex="0">公告</button></li>
-        <li><button class="nav-item" tabindex="0">课件</button></li>
+        <li>
+          <button class="nav-item" tabindex="0">测试</button>
+        </li>
+        <li>
+          <button class="nav-item" tabindex="0">公告</button>
+        </li>
+        <li>
+          <button class="nav-item" tabindex="0">课件</button>
+        </li>
       </ul>
     </nav>
   </main>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import {defineComponent, ref} from 'vue'
+import {getCourseDetail} from "../../api/course.ts";
+import {useRoute} from "vue-router";
 
 export default defineComponent({
   name: 'CourseDetails',
   methods: {
     goBack(): void {
       this.$router.push(`/courses`); // 跳转到课程详情页
+    }
+  },
+  setup() {
+    const route = useRoute(); // 获取当前路由信息
+    const courseId = ref<string>(route.params.id?.toString() || ''); // 从路由参数解析 id
+    const courseInfo = ref<any>(); // 课程详细信息
+    const fetchCourseDetailedInfo = async () => {
+      // 根据 courseId 获取课程详细信息
+      // 将courseId解析为数字
+      const {data: res} = await getCourseDetail(parseInt(courseId.value));
+      courseInfo.value = res;
+    };
+    fetchCourseDetailedInfo()
+    return {
+      courseInfo
     }
   }
 })

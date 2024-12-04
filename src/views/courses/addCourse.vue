@@ -67,6 +67,7 @@
           v-model="formData.endTime"
       />
     </div>
+    <el-button type="primary" @click="createCourse">提交</el-button>
   </form>
 </template>
 
@@ -74,6 +75,9 @@
 import {defineComponent, ref} from 'vue';
 import FormComponents from './components/formComponents.vue';
 import {CreateCourseDTO} from "../../model/dto/CreateCourseDTO.ts";
+import {addCourse} from "../../api/course.ts";
+import router from "../../router.ts";
+import {ElMessage} from "element-plus";
 
 export default defineComponent({
   name: 'CourseForm',
@@ -94,6 +98,16 @@ export default defineComponent({
       endTime: ''
     });
 
+    const createCourse = async () => {
+      try {
+        const {data: res} = await addCourse(formData.value);
+        // 创建成功，需要跳转到详情页面
+        await router.push(`/course/detail/${res.id}`);
+        ElMessage.success('创建成功');
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
     const handleImageUpload = () => {
       // Image upload logic would go here
@@ -101,6 +115,7 @@ export default defineComponent({
 
     return {
       formData,
+      createCourse,
       handleImageUpload
     };
   }

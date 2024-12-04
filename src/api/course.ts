@@ -1,7 +1,8 @@
 import request from '../utils/request';
 import { AxiosResponse } from 'axios';
-import {UserCoursesVO} from "../model/dto/UserCoursesVO";
+import {UserCoursesVO} from "../model/vo/UserCoursesVO.ts";
 import {IPage} from "../model/response/IPage";
+import {CreateCourseDTO} from "../model/dto/CreateCourseDTO.ts";
 
 /**
  * 获取课程列表接口
@@ -24,5 +25,13 @@ export const getCourseDetail = (courseId: number): Promise<AxiosResponse<UserCou
     return request({
         url: `/course/get/${courseId}`,
         method: 'get'
+    });
+}
+
+export const addCourse = (course: CreateCourseDTO) => {
+    return request({
+        url: '/course/add',
+        method: 'post',
+        data: course
     });
 }
