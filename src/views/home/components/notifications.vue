@@ -23,13 +23,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
-interface NotificationProps {
-  title: string
-  date: string
-  content: string
-  avatarUrl: string
-}
-
 export default defineComponent({
   name: 'NotificationCard',
   props: {

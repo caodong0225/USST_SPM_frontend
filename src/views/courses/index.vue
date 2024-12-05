@@ -4,7 +4,7 @@
       <div class="header-container">
         <h1 class="header-title">课程列表</h1>
         <!-- 如果是管理员，则显示添加课程按钮 -->
-        <el-button type="primary" @click="goToAddCourse" v-if="isAdmin" class="add-course-btn">添加课程</el-button>
+        <el-button type="primary" icon="el-icon-add" @click="goToAddCourse" v-if="isAdmin" class="add-course-btn">添加课程</el-button>
       </div>
     </header>
 
@@ -135,6 +135,7 @@ export default defineComponent({
 
 .add-course-btn {
   margin-left: auto; /* 保证按钮靠右 */
+  background-color: #e5e4e4;
 }
 
 .courses-list {

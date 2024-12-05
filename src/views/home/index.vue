@@ -6,7 +6,7 @@
           v-for="notification in notifications_list"
           :key="notification.id"
           :title="notification.title"
-          :date="notification.date"
+          :date="notification.createdAt"
           :content="notification.content"
           :avatarUrl="notification.avatarUrl"
       />
@@ -15,47 +15,25 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import {defineComponent, ref} from 'vue';
 import NotificationCard from "./components/notifications.vue";
-
-interface Notification {
-  id: number;
-  title: string;
-  date: string;
-  content: string;
-  avatarUrl: string;
-}
+import {fetchNotifications} from "../../api/notifications.ts";
 
 export default defineComponent({
   name: 'NotificationList',
   components: {NotificationCard },
-  data() {
+  setup() {
+    const notifications = ref<any[]>([]);
+    // 获取数据
+    const getNotifications = async () => {
+      const {data:res} = await fetchNotifications();
+      notifications.value = res;
+    }
+    getNotifications();
     return {
-      notifications_list: [
-        {
-          id: 1,
-          title: '公告发布',
-          date: '2024-11-29',
-          content: '这是一条重要通知的内容。',
-          avatarUrl: 'https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F72c80f114dc149019051b6852a9e3b7a',
-        },
-        {
-          id: 2,
-          title: '系统更新',
-          date: '2024-11-28',
-          content: '系统将在今晚进行维护。',
-          avatarUrl: 'https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2Fdefault-avatar',
-        },
-        {
-          id: 3,
-          title: '活动提醒',
-          date: '2024-11-27',
-          content: '公司年会将于下周举行。',
-          avatarUrl: 'https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2Fuser-avatar',
-        },
-      ] as Notification[],
+      notifications_list: notifications
     };
-  },
+  }
 });
 </script>
 
