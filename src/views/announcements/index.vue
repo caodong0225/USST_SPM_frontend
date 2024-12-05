@@ -6,13 +6,13 @@
 
     <div class="announcements-container">
       <AnnouncementCard
-          v-for="announcement in paginatedAnnouncements"
-          :key="announcement.id"
-          :title="announcement.title"
-          :courseName="announcement.courseName"
-          :createdAt="announcement.createdAt"
-          :teacherName="announcement.teacherName"
-          :content="announcement.content"
+          v-for="announcement in announcements"
+          :key="announcement.announcement.id"
+          :title="announcement.announcement.title"
+          :courseName="announcement.course.courseName"
+          :createdAt="announcement.announcement.createdAt"
+          :teacherName="announcement.users.nickname"
+          :content="announcement.announcement.content"
       />
     </div>
 
@@ -39,18 +39,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from "vue";
+import { defineComponent, ref } from "vue";
 import AnnouncementCard from "./components/announcements.vue";
 import { ElPagination, ElSelect, ElOption } from "element-plus";
-
-interface Announcement {
-  id: number;
-  title: string;
-  courseName: string;
-  createdAt: string;
-  teacherName: string;
-  content: string;
-}
+import {fetchAnnouncement} from "../../api/announcement.ts";
 
 export default defineComponent({
   name: "AnnouncementsList",
@@ -62,42 +54,37 @@ export default defineComponent({
   },
   setup() {
     // 模拟公告数据
-    const announcements = ref<Announcement[]>(Array.from({ length: 50 }, (_, i) => ({
-      id: i + 1,
-      title: `公告标题 ${i + 1}`,
-      courseName: `课程 ${i % 5 + 1}`,
-      createdAt: `2024-12-0${(i % 10) + 1}`,
-      teacherName: `教师 ${String.fromCharCode(65 + (i % 5))}`,
-      content: `这是公告内容 ${i + 1}。`,
-    })));
+    const announcements = ref<any[]>([]);
 
     // 分页状态
     const currentPage = ref(1);
     const itemsPerPage = ref(10);
-
-    // 计算分页后的公告列表
-    const paginatedAnnouncements = computed(() => {
-      const start = (currentPage.value - 1) * itemsPerPage.value;
-      const end = start + itemsPerPage.value;
-      return announcements.value.slice(start, end);
-    });
+    const totalNum = ref(0);
 
     // 修改每页条数
     const onPageSizeChange = (size: number) => {
       itemsPerPage.value = size;
       currentPage.value = 1; // 重新调整为第一页
+      getAnnouncements();
     };
 
     // 修改当前页码
     const onPageChange = (page: number) => {
       currentPage.value = page;
+      getAnnouncements();
     };
 
+    const getAnnouncements = async () => {
+      const {data : res} = await fetchAnnouncement(currentPage.value, itemsPerPage.value);
+      totalNum.value = res.total;
+      announcements.value = res.records;
+    }
+
+    getAnnouncements();
     return {
       announcements,
       currentPage,
       itemsPerPage,
-      paginatedAnnouncements,
       onPageSizeChange,
       onPageChange,
     };
