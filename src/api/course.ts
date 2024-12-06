@@ -1,15 +1,11 @@
 import request from '../utils/request';
-import { AxiosResponse } from 'axios';
-import {UserCoursesVO} from "../model/vo/UserCoursesVO.ts";
-import {IPage} from "../model/response/IPage";
-import {CreateCourseDTO} from "../model/dto/CreateCourseDTO.ts";
 
 /**
  * 获取课程列表接口
  * @param params 分页参数
  * @returns 返回一个包含课程列表的 Promise
  */
-export const getUserCoursesPage = (pageNum?: number, pageSize?: number): Promise<AxiosResponse<IPage<UserCoursesVO>>> => {
+export const getUserCoursesPage = (pageNum?: number, pageSize?: number) => {
     return request({
         url: `/course/list?pageNum=${pageNum}&pageSize=${pageSize}`,  // 动态替换分页参数
         method: 'get'
@@ -28,7 +24,7 @@ export const getCourseDetail = (courseId: number) => {
     });
 }
 
-export const addCourse = (course: CreateCourseDTO) => {
+export const addCourse = (course: any) => {
     return request({
         url: '/course/add',
         method: 'post',

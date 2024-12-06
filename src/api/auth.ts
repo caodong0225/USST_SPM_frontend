@@ -1,17 +1,12 @@
 import request from '../utils/request'
-import {loginDTO} from "../model/dto/LoginDTO.ts";
-import {registerDTO} from "../model/dto/RegisterDTO.ts";
-import {LoginDataResponseVO} from "../model/response/BaseResponse";
-import {UsersVO} from "../model/vo/UsersVO.ts";
-import {AxiosResponse} from "axios"; // 引入自定义的axios函数
 
 /**
  * 登录接口
  * @param params 登录的 DTO 对象
  * @returns 返回一个包含 BaseResponse 的 Promise
  */
-export const loginAPI = (params: loginDTO) : Promise<AxiosResponse<LoginDataResponseVO>> => {
-    return request<LoginDataResponseVO>({
+export const loginAPI = (params: any) => {
+    return request({
         url: '/auth/login',
         method: 'post',
         data: { ...params },
@@ -23,8 +18,8 @@ export const loginAPI = (params: loginDTO) : Promise<AxiosResponse<LoginDataResp
  * @param params 注册的 DTO 对象
  * @returns 返回一个包含 BaseResponse 的 Promise
  */
-export const registerAPI = (params: registerDTO): Promise<AxiosResponse<UsersVO>> => {
-    return request<UsersVO>({
+export const registerAPI = (params: any) => {
+    return request({
         url: '/auth/register',
         method: 'post',
         data: { ...params },
