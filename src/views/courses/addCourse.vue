@@ -84,7 +84,6 @@
 <script lang="ts">
 import {defineComponent, ref} from 'vue';
 import FormComponents from './components/formComponents.vue';
-import {CreateCourseDTO} from "../../model/dto/CreateCourseDTO.ts";
 import {addCourse} from "../../api/course.ts";
 import router from "../../router.ts";
 import {ElMessage} from "element-plus";
@@ -100,7 +99,7 @@ export default defineComponent({
     }
   },
   setup() {
-    const formData = ref<CreateCourseDTO>({
+    const formData = ref<any>({
       courseName: '',
       courseDesc: '',
       coursePic: '',
