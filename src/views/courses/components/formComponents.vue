@@ -82,3 +82,9 @@ export default defineComponent({
   },
 });
 </script>
+<style scoped>
+.form-input {
+  margin-left: 20px;
+  color: #333;
+}
+</style>

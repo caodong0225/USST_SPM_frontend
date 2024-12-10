@@ -27,7 +27,7 @@
         >
           上传图片
         </el-button>
-        <input
+        <el-input
             type="file"
             ref="fileInput"
             accept="image/*"
@@ -74,7 +74,10 @@
           v-model="formData.endTime"
       />
     </div>
-    <el-button type="primary" @click="createCourse">提交</el-button>
+    <div class="submit-button">
+      <el-button type="primary" @click="createCourse">提交</el-button>
+    </div>
+
   </form>
 </template>
 
@@ -171,6 +174,12 @@ export default defineComponent({
   display: flex;
   flex-direction: row;
   margin-right: 20px;
+}
+
+.submit-button{
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 
 .course-form {

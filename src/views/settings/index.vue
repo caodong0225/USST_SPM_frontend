@@ -9,14 +9,13 @@
       <div class="info-row">
         <span class="info-label">当前头像</span>
         <div class="avatar-container">
-          <button
-              class="upload-button"
+          <el-button
               @click="triggerFileInput"
               tabindex="0"
               role="button"
               aria-label="上传头像">
             上传头像
-          </button>
+          </el-button>
           <input
               type="file"
               ref="fileInput"
