@@ -17,7 +17,7 @@
         </div>
         <div class="detail-row">
           <span class="detail-label">课程状态：</span>
-          <span class="detail-value">{{status}}</span>
+          <span class="detail-value">{{status == 'ongoing' ? '授课中' : status == 'ended' ? '已结课' : '即将开课'}}</span>
         </div>
       </div>
       <p class="course-description">{{description}}</p>

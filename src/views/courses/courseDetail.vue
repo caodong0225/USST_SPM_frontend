@@ -9,29 +9,19 @@
         <h2 class="instructor-label">授课教师</h2>
         <img
             loading="lazy"
-            :src="courseInfo?.picture"
+            :src="courseInfo?.picture || defaultAvatar"
             class="instructor-avatar"
             alt="授课教师头像"
         />
         <div class="course-actions">
           <button class="action-button" tabindex="0">
-            <img
-                loading="lazy"
-                src="https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F72c80f114dc149019051b6852a9e3b7a"
-                class="action-icon"
-                alt=""
-            />
+            <el-icon><InfoFilled /></el-icon>
             <span class="action-text">课程信息</span>
           </button>
         </div>
         <div class="member-section">
           <button class="action-button" tabindex="0">
-            <img
-                loading="lazy"
-                src="https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F72c80f114dc149019051b6852a9e3b7a"
-                class="action-icon"
-                alt=""
-            />
+            <el-icon><user /></el-icon>
             <span class="action-text">班级成员</span>
           </button>
         </div>
@@ -40,12 +30,15 @@
     <nav class="course-navigation">
       <ul class="navigation-list">
         <li>
+          <el-icon><Reading /></el-icon>
           <button class="nav-item" tabindex="0">测试</button>
         </li>
         <li>
+          <el-icon><ChatRound /></el-icon>
           <button class="nav-item" tabindex="0">公告</button>
         </li>
         <li>
+          <el-icon><DocumentCopy /></el-icon>
           <button class="nav-item" tabindex="0">课件</button>
         </li>
       </ul>
@@ -77,7 +70,8 @@ export default defineComponent({
     };
     fetchCourseDetailedInfo()
     return {
-      courseInfo
+      courseInfo,
+      defaultAvatar: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
     }
   }
 })
