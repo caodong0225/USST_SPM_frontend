@@ -43,7 +43,9 @@
         </li>
       </ul>
     </nav>
-    <CourseInformation v-if = "subView == 0"/>
+    <TableWithPagination v-if = "subView == 0"/>
+    <CreateAnnouncement v-if = "subView == 1"/>
+    <CreateAnnouncement v-if = "subView == 4"/>
   </main>
 </template>
 
@@ -52,10 +54,12 @@ import {defineComponent, ref} from 'vue'
 import {getCourseDetail} from "../../api/course.ts";
 import {useRoute} from "vue-router";
 import CourseInformation from "./components/courseInfo.vue";
+import CreateAnnouncement from "../announcements/components/addAnnouncement.vue";
+import TableWithPagination from "./components/coursePapers.vue";
 
 export default defineComponent({
   name: 'CourseDetails',
-  components: {CourseInformation},
+  components: {TableWithPagination, CreateAnnouncement, CourseInformation},
   methods: {
     goBack(): void {
       this.$router.push(`/courses`); // 跳转到课程详情页
@@ -65,7 +69,7 @@ export default defineComponent({
     const route = useRoute(); // 获取当前路由信息
     const courseId = ref<string>(route.params.id?.toString() || ''); // 从路由参数解析 id
     const courseInfo = ref<any>(); // 课程详细信息
-    const subView = ref<number>(); // 子视图
+    const subView = ref<number>(0); // 子视图
     const fetchCourseDetailedInfo = async () => {
       // 根据 courseId 获取课程详细信息
       // 将courseId解析为数字
