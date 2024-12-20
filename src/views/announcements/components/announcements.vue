@@ -14,14 +14,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
-interface AnnouncementProps {
-  title: string
-  courseName: string
-  createdAt: string
-  teacherName: string
-  content: string
-}
-
 export default defineComponent({
   name: 'AnnouncementCard',
   props: {

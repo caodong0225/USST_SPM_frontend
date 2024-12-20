@@ -22,7 +22,7 @@
           :startTime="course.startTime"
           :status="course.status"
           :description="course.courseDesc"
-          :imageUrl="course.coursePic"
+          :imageUrl="course.coursePic? course.coursePic : '/course.png'"
       />
     </div>
 

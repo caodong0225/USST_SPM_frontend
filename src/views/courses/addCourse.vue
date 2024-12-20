@@ -20,14 +20,14 @@
       <div class="cover-header">
         <label class="cover-label">课程封面</label>
         <el-button
-            type="button"
+            role="button"
             class="upload-button"
             @click="triggerFileInput"
             tabindex="0"
         >
           上传图片
         </el-button>
-        <el-input
+        <input
             type="file"
             ref="fileInput"
             accept="image/*"
@@ -36,7 +36,7 @@
         />
       </div>
       <img
-          :src="formData.coursePic? formData.coursePic:'https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F72c80f114dc149019051b6852a9e3b7a'"
+          :src="formData.coursePic? formData.coursePic:'/course.png'"
           alt="课程封面图片"
           class="cover-image"
       />

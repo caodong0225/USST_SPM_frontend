@@ -7,12 +7,16 @@
       </nav>
       <section class="instructor-section">
         <h2 class="instructor-label">授课教师</h2>
-        <img
-            loading="lazy"
-            :src="courseInfo?.picture || defaultAvatar"
-            class="instructor-avatar"
-            alt="授课教师头像"
-        />
+        <el-tooltip
+            effect="dark"
+            :content="courseInfo?.teacher.nickname">
+          <img
+              loading="lazy"
+              :src="courseInfo?.picture || defaultAvatar"
+              class="instructor-avatar"
+              alt="授课教师头像"
+          />
+        </el-tooltip>
         <div class="course-actions">
           <button class="action-button" tabindex="0">
             <el-icon><InfoFilled /></el-icon>
@@ -27,25 +31,21 @@
         </div>
       </section>
     </header>
-    <nav class="course-navigation" v-if = "subView != 0">
+    <nav class="course-navigation" v-if = "subView <= 3">
       <ul class="navigation-list">
-        <li>
-          <el-icon><Reading /></el-icon>
-          <button class="nav-item" tabindex="0" @click="changeView(0)">测试</button>
-        </li>
-        <li>
-          <el-icon><ChatRound /></el-icon>
-          <button class="nav-item" tabindex="0">公告</button>
-        </li>
-        <li>
-          <el-icon><DocumentCopy /></el-icon>
-          <button class="nav-item" tabindex="0">课件</button>
+        <li
+            v-for="(item, index) in navItems"
+            :key="index"
+            :class="{ 'active': activeIndex === index }"
+            @click="changeIndex(index)"
+        >
+          <el-button class="nav-item" tabindex="0" :icon="item.icon">{{ item.label }}</el-button>
         </li>
       </ul>
     </nav>
-    <TableWithPagination v-if = "subView == 0"/>
-    <CreateAnnouncement v-if = "subView == 1"/>
-    <CreateAnnouncement v-if = "subView == 4"/>
+    <TableWithPagination :table-data="paperInfo" v-if = "activeIndex == 0"/>
+    <CreateAnnouncement v-if = "activeIndex == 1"/>
+    <CreateAnnouncement v-if = "activeIndex == 4"/>
   </main>
 </template>
 
@@ -54,8 +54,9 @@ import {defineComponent, ref} from 'vue'
 import {getCourseDetail} from "../../api/course.ts";
 import {useRoute} from "vue-router";
 import CourseInformation from "./components/courseInfo.vue";
-import CreateAnnouncement from "../announcements/components/addAnnouncement.vue";
 import TableWithPagination from "./components/coursePapers.vue";
+import CreateAnnouncement from "../announcements/components/addAnnouncement.vue";
+import {getPapers} from "../../api/paper.ts";
 
 export default defineComponent({
   name: 'CourseDetails',
@@ -65,24 +66,51 @@ export default defineComponent({
       this.$router.push(`/courses`); // 跳转到课程详情页
     }
   },
+  data() {
+    return {
+      navItems: [
+        { label: '测试', icon: 'Document' },       // 使用图标组件
+        { label: '公告', icon: 'ChatRound' },
+        { label: '课件', icon: 'DocumentCopy' },
+      ],
+    }
+  },
   setup() {
     const route = useRoute(); // 获取当前路由信息
     const courseId = ref<string>(route.params.id?.toString() || ''); // 从路由参数解析 id
     const courseInfo = ref<any>(); // 课程详细信息
+    const paperInfo = ref<any>(); // 课程详细信息
     const subView = ref<number>(0); // 子视图
+    const activeIndex = ref<number>(0); // 当前激活的导航栏索引
     const fetchCourseDetailedInfo = async () => {
       // 根据 courseId 获取课程详细信息
       // 将courseId解析为数字
       const {data: res} = await getCourseDetail(parseInt(courseId.value));
       courseInfo.value = res;
     };
+    const fetchCoursePapers = async () => {
+      // Fetch course detailed info
+      const { data: res } = await getPapers(courseId.value);
+      paperInfo.value = res;
+    };
     const changeView = (data : number) => {
       subView.value = data;
     }
+    const changeIndex = (data : number) => {
+      if(data == 0){
+        fetchCoursePapers()
+      }
+      activeIndex.value = data;
+    }
     fetchCourseDetailedInfo()
+    fetchCoursePapers()
     return {
       courseInfo,
+      courseId,
+      activeIndex,
+      paperInfo,
       changeView,
+      changeIndex,
       subView,
       defaultAvatar: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
     }
@@ -109,6 +137,11 @@ export default defineComponent({
   display: flex;
   flex-direction: row;
   margin-right: 20px;
+}
+
+.navigation-list li.active .nav-item {
+  background-color: #409eff;
+  color: #fff;
 }
 
 .back-button {

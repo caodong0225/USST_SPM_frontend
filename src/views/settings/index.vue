@@ -24,7 +24,7 @@
               class="visually-hidden"
           />
           <img
-              :src="avatarBase64?avatarBase64:'https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F72c80f114dc149019051b6852a9e3b7a'"
+              :src="avatarBase64?avatarBase64:'/person.png'"
               class="profile-avatar"
               alt="用户头像"
           />

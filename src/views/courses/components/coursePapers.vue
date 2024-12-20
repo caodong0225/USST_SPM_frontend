@@ -13,9 +13,16 @@
           align="center"
       />
       <el-table-column
+          label="可见性"
+          align="center"
+          width="180"
+          v-if = "role != null"
+      />
+      <el-table-column
           label="操作"
           align="center"
           width="180"
+          v-if = "role != null"
       >
         <template #default="scope">
           <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
@@ -37,27 +44,29 @@
 
 <script>
 import { ref } from "vue";
+import {useUserInfoStore} from "../../../store";
 
 export default {
   name: "TableWithPagination",
+  props: {
+    tableData: {
+      type: Array,
+      required: true,
+    },
+  },
   setup() {
     const columns = ref([
-      { label: "用户名", prop: "username" },
-      { label: "角色", prop: "role" },
-      { label: "邮箱", prop: "email" },
+      { label: "测试ID", prop: "id"},
+      { label: "测试名称", prop: "paperName" },
+      { label: "测试开始时间", prop: "paperStartTime" },
+      { label: "测试状态", prop: "status" },
     ]);
 
-    const tableData = ref([
-      { username: "用户A", role: "管理员", email: "a@example.com" },
-      { username: "用户B", role: "普通用户", email: "b@example.com" },
-      { username: "用户C", role: "普通用户", email: "c@example.com" },
-      { username: "用户D", role: "管理员", email: "d@example.com" },
-      { username: "用户E", role: "普通用户", email: "e@example.com" },
-      { username: "用户F", role: "普通用户", email: "f@example.com" },
-    ]);
-
+    const tableData = ref([]);
     const currentPage = ref(1);
     const pageSize = ref(3);
+    const userInfoStore = useUserInfoStore()
+    const role = userInfoStore.userInfo.role
 
     const handlePageChange = (page) => {
       currentPage.value = page;
@@ -76,6 +85,7 @@ export default {
       tableData,
       currentPage,
       pageSize,
+      role,
       handlePageChange,
       handleEdit,
       handleDelete,
