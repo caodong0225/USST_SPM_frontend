@@ -27,11 +27,11 @@
         </div>
       </section>
     </header>
-    <nav class="course-navigation">
+    <nav class="course-navigation" v-if = "subView != 0">
       <ul class="navigation-list">
         <li>
           <el-icon><Reading /></el-icon>
-          <button class="nav-item" tabindex="0">测试</button>
+          <button class="nav-item" tabindex="0" @click="changeView(0)">测试</button>
         </li>
         <li>
           <el-icon><ChatRound /></el-icon>
@@ -43,6 +43,7 @@
         </li>
       </ul>
     </nav>
+    <CourseInformation v-if = "subView == 0"/>
   </main>
 </template>
 
@@ -50,9 +51,11 @@
 import {defineComponent, ref} from 'vue'
 import {getCourseDetail} from "../../api/course.ts";
 import {useRoute} from "vue-router";
+import CourseInformation from "./components/courseInfo.vue";
 
 export default defineComponent({
   name: 'CourseDetails',
+  components: {CourseInformation},
   methods: {
     goBack(): void {
       this.$router.push(`/courses`); // 跳转到课程详情页
@@ -62,15 +65,21 @@ export default defineComponent({
     const route = useRoute(); // 获取当前路由信息
     const courseId = ref<string>(route.params.id?.toString() || ''); // 从路由参数解析 id
     const courseInfo = ref<any>(); // 课程详细信息
+    const subView = ref<number>(); // 子视图
     const fetchCourseDetailedInfo = async () => {
       // 根据 courseId 获取课程详细信息
       // 将courseId解析为数字
       const {data: res} = await getCourseDetail(parseInt(courseId.value));
       courseInfo.value = res;
     };
+    const changeView = (data : number) => {
+      subView.value = data;
+    }
     fetchCourseDetailedInfo()
     return {
       courseInfo,
+      changeView,
+      subView,
       defaultAvatar: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
     }
   }
