@@ -6,7 +6,7 @@
         <div class="detail-wrapper">
           <div class="detail-grid">
             <div class="label-column"><span class="detail-label">课程名称</span></div>
-            <div class="value-column"><span class="detail-value">数据库</span></div>
+            <div class="value-column"><span class="detail-value">{{courseInfo?.course.courseName}}</span></div>
           </div>
         </div>
       </div>
@@ -14,7 +14,7 @@
         <div class="detail-wrapper">
           <div class="detail-grid">
             <div class="label-column"><span class="detail-label">开课日期</span></div>
-            <div class="value-column"><span class="detail-value">2023-11-4</span></div>
+            <div class="value-column"><span class="detail-value">{{courseInfo?.course.startTime}}</span></div>
           </div>
         </div>
       </div>
@@ -24,7 +24,7 @@
         <div class="detail-wrapper">
           <div class="detail-grid">
             <div class="label-column"><span class="detail-label">授课教师</span></div>
-            <div class="value-column"><span class="detail-value">张三</span></div>
+            <div class="value-column"><span class="detail-value">{{courseInfo?.teacher.nickname}}</span></div>
           </div>
         </div>
       </div>
@@ -32,7 +32,7 @@
         <div class="detail-wrapper">
           <div class="detail-grid">
             <div class="label-column"><span class="detail-label">结课日期</span></div>
-            <div class="value-column"><span class="detail-value">2024-11-4</span></div>
+            <div class="value-column"><span class="detail-value">{{courseInfo?.course.endTime}}</span></div>
           </div>
         </div>
       </div>
@@ -42,7 +42,7 @@
         <div class="detail-wrapper">
           <div class="detail-grid">
             <div class="label-column"><span class="detail-label">课程状态</span></div>
-            <div class="value-column"><span class="detail-value">授课中</span></div>
+            <div class="value-column"><span class="detail-value">{{courseInfo?.course.status}}</span></div>
           </div>
         </div>
       </div>
@@ -50,23 +50,42 @@
         <div class="detail-wrapper">
           <div class="detail-grid">
             <div class="label-column"><span class="detail-label">课程编号</span></div>
-            <div class="value-column"><span class="detail-value">1</span></div>
+            <div class="value-column"><span class="detail-value">{{courseInfo?.course.id}}</span></div>
           </div>
         </div>
       </div>
     </div>
     <div class="course-description">
       <h2 class="description-title">课程描述</h2>
-      <p class="description-content">这是测试课程</p>
+      <p class="description-content">{{courseInfo?.course.courseDesc}}</p>
     </div>
   </section>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-
+interface CourseInfo {
+  course: {
+    id: number;
+    courseName: string;
+    courseDesc: string;
+    startTime: string;
+    endTime: string;
+    status: string;
+  };
+  teacher: {
+    nickname: string;
+  };
+  picture: string
+}
 export default defineComponent({
-  name: 'CourseInformation'
+  name: 'CourseInformation',
+  props: {
+    courseInfo: {
+      type: Object as () => CourseInfo,
+      required: true
+    }
+  }
 })
 </script>
 

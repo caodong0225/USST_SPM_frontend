@@ -18,20 +18,20 @@
           />
         </el-tooltip>
         <div class="course-actions">
-          <button class="action-button" tabindex="0">
+          <button class="action-button" tabindex="0" :class="{ 'highlight': subView === 1 }">
             <el-icon><InfoFilled /></el-icon>
-            <span class="action-text">课程信息</span>
+            <span class="action-text" @click="changeView(1)">课程信息</span>
           </button>
         </div>
         <div class="member-section">
-          <button class="action-button" tabindex="0">
+          <button class="action-button" tabindex="0" :class="{ 'highlight': subView === 2 }">
             <el-icon><user /></el-icon>
-            <span class="action-text">班级成员</span>
+            <span class="action-text" @click="changeView(2)">班级成员</span>
           </button>
         </div>
       </section>
     </header>
-    <nav class="course-navigation" v-if = "subView <= 3">
+    <nav class="course-navigation" v-if = "subView == 0">
       <ul class="navigation-list">
         <li
             v-for="(item, index) in navItems"
@@ -41,10 +41,14 @@
         >
           <el-button class="nav-item" tabindex="0" :icon="item.icon">{{ item.label }}</el-button>
         </li>
+        <li :class="{ 'active': activeIndex === 3 }" v-if = "isAdmin">
+          <el-button class="nav-item" tabindex="0" @click="changeIndex(3)" icon="Grid">题库</el-button>
+        </li>
       </ul>
+      <TableWithPagination :table-data="paperInfo" :course-id="courseId" v-if = "activeIndex == 0"/>
+      <CreateAnnouncement :course-id="courseId" v-if = "activeIndex == 1"/>
     </nav>
-    <TableWithPagination :table-data="paperInfo" :course-id="courseId" v-if = "activeIndex == 0"/>
-    <CreateAnnouncement v-if = "activeIndex == 1"/>
+    <CourseInformation v-if = "subView == 1" :course-info="courseInfo"/>
   </main>
 </template>
 
@@ -56,6 +60,7 @@ import CourseInformation from "./components/courseInfo.vue";
 import TableWithPagination from "./components/coursePapers.vue";
 import {getPapers} from "../../api/paper.ts";
 import CreateAnnouncement from "./components/createAnnouncement.vue";
+import {useUserInfoStore} from "../../store";
 
 export default defineComponent({
   name: 'CourseDetails',
@@ -81,6 +86,11 @@ export default defineComponent({
     const paperInfo = ref<any>(); // 课程详细信息
     const subView = ref<number>(0); // 子视图
     const activeIndex = ref<number>(0); // 当前激活的导航栏索引
+    const isAdmin = ref(false);
+    const userInfoStore = useUserInfoStore();
+    if (userInfoStore.userInfo.role > 0) {
+      isAdmin.value = true;
+    }
     const fetchCourseDetailedInfo = async () => {
       // 根据 courseId 获取课程详细信息
       // 将courseId解析为数字
@@ -108,6 +118,7 @@ export default defineComponent({
       courseId,
       activeIndex,
       paperInfo,
+      isAdmin,
       changeView,
       changeIndex,
       subView,
@@ -235,5 +246,11 @@ export default defineComponent({
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
+}
+
+.highlight {
+  background-color: #409eff; /* 高亮背景色 */
+  color: white; /* 高亮字体颜色 */
+  border-radius: 5px;
 }
 </style>

@@ -1,4 +1,3 @@
-// 给我留言页面
 <template>
   <div id="message">
     <div class="title">创建公告</div>
@@ -20,7 +19,7 @@
         </el-input>
       </div>
       <div class="btn">
-        <el-button type="primary" @click="submit()">提交公告</el-button>
+        <el-button type="primary" @click="submit()">发布公告</el-button>
       </div>
       <div class="all">
         <ul class="msglist">
@@ -32,10 +31,10 @@
             <p class="title"> <i class="iconfont icon-untitled33"></i>{{data.title}}</p>
             <p class="content">{{data.content}}</p>
             <p class="date"><i class="iconfont icon-date"></i>{{data.time}}</p>
-            <div v-for="(replayData,index2) in data.replays" :key="index2">
-              <p class="comment"><i class="iconfont icon-huifuxiaoxi"></i>{{replayData.replay}}</p>
-            </div>
-            <span class="replay" @click="replay(data.id)" v-if="flag && index == current">Comment</span>
+<!--            <div v-for="(replayData,index2) in data.replays" :key="index2">-->
+<!--              <p class="comment"><i class="iconfont icon-huifuxiaoxi"></i>{{replayData.replay}}</p>-->
+<!--            </div>-->
+<!--            <span class="replay" @click="replay(data.id)" v-if="flag && index == current">Comment</span>-->
           </li>
         </ul>
       </div>
@@ -55,8 +54,17 @@
 </template>
 
 <script>
+import {createAnnouncement, fetchCourseAnnouncement} from "../../../api/announcement.ts";
+import {ElMessage} from "element-plus";
+
 export default {
   name: 'CreateAnnouncement',
+  props: {
+    courseId: {
+      type: Number,
+      required: true
+    }
+  },
   data() {
     return {
       flag: false,
@@ -71,19 +79,12 @@ export default {
       msg: []
     }
   },
-  created() {
-
-  },
-  // watch: {
-    
-  // },
   methods: {
     getMsg() {
-      this.$axios(`/api/messages/${this.pagination.current}/${this.pagination.size}`).then(res => {
-        let status = res.data.code
-        if(status == 200) {
-          this.msg = res.data.data.records
-          this.pagination = res.data.data
+      fetchCourseAnnouncement(this.courseId,this.pagination.current,this.pagination.size).then(res => {
+        if(res.code === 200) {
+          this.msg = res.data.records
+          this.pagination = res.data.pages
         }
       })
     },
@@ -108,66 +109,16 @@ export default {
     //   return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
     // },
     submit() {
-      let date = new Date()
       if(this.title.length == 0 || this.content.length == 0) { //非空判断
-        this.$message({
-          type: 'error',
-          message: '留言标题或内容不能为空',
-        })
+        ElMessage.error("公告标题或内容不能为空")
        } else {
-      this.$axios({
-        url: "/api/message",
-        method: "post",
-        data: {
-          title: this.title,
-          content: this.content,
-          time: date
-        }
-      }).then(res => {
-        let code = res.data.code
-        if(code == 200) {
-          this.$message({
-            type: "success",
-            message: "留言成功"
-          })
-        }
-        this.getMsg()
-      })
+        createAnnouncement(this.courseId,{title:this.title,content:this.content}).then(res => {
+          ElMessage.success("公告发布成功")
+        })
     }
       this.title = ""
       this.content = ""
       this.getMsg()
-    },
-    replay(messageId) { //回复留言功能
-      this.$prompt('回复留言', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        inputPattern: /^[\s\S]*.*[^\s][\s\S]*$/,
-        inputErrorMessage: '回复不能为空'
-      }).then(({ value }) => {
-        let date = new Date()
-        console.log(messageId)
-        this.$axios({
-          url: '/api/replay',
-          method: 'post',
-          data: {
-            replay: value,
-            replayTime: date,
-            messageId: messageId
-          }
-        }).then(res => {
-          this.getMsg()
-        })
-        this.$message({
-          type: 'success',
-          message: '回复成功'
-        });
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '取消输入'
-        });       
-      });
     },
     enter(index) {
       this.flag = true
@@ -177,6 +128,9 @@ export default {
       this.flag = false;
       this.current = index;
     }
+  },
+  created() {
+    this.getMsg()
   }
 }
 </script>
