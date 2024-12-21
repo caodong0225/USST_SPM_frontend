@@ -1,5 +1,9 @@
 <template>
-  <el-card>
+  <el-card v-if="!addPaper">
+    <div class = "header-container">
+      <h3>测试列表</h3>
+      <el-button type="primary" @click="addPaper = true" style="margin-left: auto;" icon="Plus" v-if="isAdmin">新建测试</el-button>
+    </div>
     <el-table
         :data="tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)"
         style="width: 100%"
@@ -16,13 +20,13 @@
           label="可见性"
           align="center"
           width="180"
-          v-if = "role != null"
+          v-if = "isAdmin"
       />
       <el-table-column
           label="操作"
           align="center"
           width="180"
-          v-if = "role != null"
+          v-if = "isAdmin"
       >
         <template #default="scope">
           <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
@@ -40,19 +44,26 @@
         @current-change="handlePageChange"
     />
   </el-card>
+  <CreatePaper :course-id="courseId" v-else/>
 </template>
 
 <script>
 import { ref } from "vue";
 import {useUserInfoStore} from "../../../store";
+import CreatePaper from "./addPaper.vue";
 
 export default {
   name: "TableWithPagination",
+  components: {CreatePaper},
   props: {
     tableData: {
       type: Array,
       required: true,
     },
+    courseId:{
+      type: String,
+      required: true,
+    }
   },
   setup() {
     const columns = ref([
@@ -66,8 +77,11 @@ export default {
     const currentPage = ref(1);
     const pageSize = ref(3);
     const userInfoStore = useUserInfoStore()
-    const role = userInfoStore.userInfo.role
-
+    const isAdmin = ref(false);
+    const addPaper = ref(false);
+    if (userInfoStore.userInfo.role > 0) {
+      isAdmin.value = true;
+    }
     const handlePageChange = (page) => {
       currentPage.value = page;
     };
@@ -85,7 +99,8 @@ export default {
       tableData,
       currentPage,
       pageSize,
-      role,
+      isAdmin,
+      addPaper,
       handlePageChange,
       handleEdit,
       handleDelete,
@@ -97,5 +112,11 @@ export default {
 <style scoped>
 .table-container {
   padding: 20px;
+}
+.header-container {
+  display: flex;
+  align-items: center; /* 垂直居中 */
+  justify-content: space-between; /* 两端对齐 */
+  padding: 0 20px; /* 根据需要调整内边距 */
 }
 </style>

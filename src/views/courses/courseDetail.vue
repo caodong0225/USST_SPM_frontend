@@ -43,9 +43,8 @@
         </li>
       </ul>
     </nav>
-    <TableWithPagination :table-data="paperInfo" v-if = "activeIndex == 0"/>
+    <TableWithPagination :table-data="paperInfo" :course-id="courseId" v-if = "activeIndex == 0"/>
     <CreateAnnouncement v-if = "activeIndex == 1"/>
-    <CreateAnnouncement v-if = "activeIndex == 4"/>
   </main>
 </template>
 
@@ -55,7 +54,6 @@ import {getCourseDetail} from "../../api/course.ts";
 import {useRoute} from "vue-router";
 import CourseInformation from "./components/courseInfo.vue";
 import TableWithPagination from "./components/coursePapers.vue";
-import CreateAnnouncement from "../announcements/components/addAnnouncement.vue";
 import {getPapers} from "../../api/paper.ts";
 
 export default defineComponent({

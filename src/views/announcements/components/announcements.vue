@@ -1,42 +1,38 @@
 <template>
   <article class="announcement-card">
-    <h1 class="announcement-title">{{title}}</h1>
+    <h1 class="announcement-title">{{info.announcement.title}}</h1>
     <div class="announcement-meta">
-      <span class="course-name">{{courseName}}</span>
-      <time class="creation-time">{{createdAt}}</time>
-      <span class="teacher-name">{{teacherName}}</span>
+      <span class="course-name">{{info.course.courseName}}</span>
+      <time class="creation-time">{{info.announcement.createdAt}}</time>
+      <span class="teacher-name">{{info.users.nickname}}</span>
       <div class="meta-content"></div>
     </div>
-    <p class="announcement-content">{{content}}</p>
+    <p class="announcement-content">{{info.announcement.content}}</p>
   </article>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-
+interface AnnouncementInfo {
+  announcement: {
+    title: string;
+    content: string;
+    createdAt: string;
+  };
+  course: {
+    courseName: string;
+  };
+  users: {
+    nickname: string;
+  };
+}
 export default defineComponent({
   name: 'AnnouncementCard',
   props: {
-    title: {
-      type: String,
+    info: {
+      type: Object as () => AnnouncementInfo,
       required: true
     },
-    courseName: {
-      type: String,
-      required: true
-    },
-    createdAt: {
-      type: String,
-      required: true
-    },
-    teacherName: {
-      type: String,
-      required: true
-    },
-    content: {
-      type: String,
-      required: true
-    }
   }
 })
 </script>

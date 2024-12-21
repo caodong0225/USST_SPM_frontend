@@ -8,11 +8,7 @@
       <AnnouncementCard
           v-for="announcement in announcements"
           :key="announcement.announcement.id"
-          :title="announcement.announcement.title"
-          :courseName="announcement.course.courseName"
-          :createdAt="announcement.announcement.createdAt"
-          :teacherName="announcement.users.nickname"
-          :content="announcement.announcement.content"
+          :info="announcement"
       />
     </div>
 
