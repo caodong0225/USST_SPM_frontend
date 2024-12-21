@@ -6,3 +6,18 @@ export const getPapers = (id: string) => {
         method: 'get',
     });
 }
+
+export const createPaper = (data: any) => {
+    return request({
+        url: '/paper/create',
+        method: 'post',
+        data,
+    });
+}
+
+export const deletePaper = (id: string) => {
+    return request({
+        url: `/paper/delete/${id}`,
+        method: 'delete',
+    });
+}

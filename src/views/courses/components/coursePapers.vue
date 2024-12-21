@@ -8,6 +8,7 @@
         :data="tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)"
         style="width: 100%"
         :border="true"
+        @row-click="handleEntry"
     >
       <el-table-column
           v-for="column in columns"
@@ -20,6 +21,7 @@
           label="可见性"
           align="center"
           width="180"
+          prop="visible"
           v-if = "isAdmin"
       />
       <el-table-column
@@ -29,8 +31,8 @@
           v-if = "isAdmin"
       >
         <template #default="scope">
-          <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+          <el-button size="mini" @click="handleEdit(scope.row)" v-if = "isAdmin">编辑</el-button>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.row)" v-if = "isAdmin">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -51,6 +53,8 @@
 import { ref } from "vue";
 import {useUserInfoStore} from "../../../store";
 import CreatePaper from "./addPaper.vue";
+import {deletePaper} from "../../../api/paper.ts";
+import {ElMessage} from "element-plus";
 
 export default {
   name: "TableWithPagination",
@@ -70,10 +74,10 @@ export default {
       { label: "测试ID", prop: "id"},
       { label: "测试名称", prop: "paperName" },
       { label: "测试开始时间", prop: "paperStartTime" },
+      { label: "测试结束时间", prop: "paperEndTime" },
       { label: "测试状态", prop: "status" },
     ]);
 
-    const tableData = ref([]);
     const currentPage = ref(1);
     const pageSize = ref(3);
     const userInfoStore = useUserInfoStore()
@@ -90,17 +94,30 @@ export default {
       alert(`编辑用户：${row.username}`);
     };
 
+    const handleEntry = (row) =>{
+      console.log(row)
+    }
+
     const handleDelete = (row) => {
-      alert(`删除用户：${row.username}`);
+      deletePaper(row.id).then(res => {
+        console.log(res)
+        if(res.code === 200){
+          ElMessage.success('删除成功');
+          // 刷新当前组件的数据信息
+          this.tableData = this.tableData.filter(item => item.id !== row.id)
+        }else{
+          ElMessage.error('删除失败')
+        }
+      })
     };
 
     return {
       columns,
-      tableData,
       currentPage,
       pageSize,
       isAdmin,
       addPaper,
+      handleEntry,
       handlePageChange,
       handleEdit,
       handleDelete,

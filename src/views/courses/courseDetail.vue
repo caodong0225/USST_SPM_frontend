@@ -55,10 +55,11 @@ import {useRoute} from "vue-router";
 import CourseInformation from "./components/courseInfo.vue";
 import TableWithPagination from "./components/coursePapers.vue";
 import {getPapers} from "../../api/paper.ts";
+import CreateAnnouncement from "./components/createAnnouncement.vue";
 
 export default defineComponent({
   name: 'CourseDetails',
-  components: {TableWithPagination, CreateAnnouncement, CourseInformation},
+  components: {CreateAnnouncement, TableWithPagination, CourseInformation},
   methods: {
     goBack(): void {
       this.$router.push(`/courses`); // 跳转到课程详情页

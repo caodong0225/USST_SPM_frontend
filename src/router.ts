@@ -56,7 +56,7 @@ const router = createRouter({
             path: '/reg',
             name: 'reg',
             component: () => import('./views/reg/index.vue')
-        }
+        },
     ]
 })
 
