@@ -18,33 +18,6 @@
             </el-select>
           </li>
           <li v-if="optionValue == '选择题'">
-            <span>所属章节：</span>
-            <el-input
-              placeholder="请输入对应章节"
-              v-model="postChange.section"
-              class="w150"
-              clearable>
-            </el-input>
-          </li>
-          <li v-if="optionValue == '填空题'">
-            <span>所属章节：</span>
-            <el-input
-              placeholder="请输入对应章节"
-              v-model="postFill.section"
-              class="w150"
-              clearable>
-            </el-input>
-          </li>
-          <li v-if="optionValue == '判断题'">
-            <span>所属章节：</span>
-            <el-input
-              placeholder="请输入对应章节"
-              v-model="postJudge.section"
-              class="w150"
-              clearable>
-            </el-input>
-          </li>
-          <li v-if="optionValue == '选择题'">
             <span>难度等级:</span>
             <el-select v-model="postChange.level" placeholder="选择难度等级" class="w150">
               <el-option
@@ -104,39 +77,17 @@
           </div>
           <div class="options">
             <ul>
-              <li>
-                <el-tag type="success">A</el-tag>
+              <li v-for="(right, index) in rights" :key="index">
+                <el-tag type="success">{{right.label}}</el-tag>
                 <el-input
-                  placeholder="请输入选项A的内容"
-                  v-model="postChange.answerA"
-                  clearable="">
-                </el-input>
-              </li>
-              <li>
-                <el-tag type="success">B</el-tag>
-                <el-input
-                  placeholder="请输入选项B的内容"
-                  v-model="postChange.answerB"
-                  clearable="">
-                </el-input>
-              </li>
-              <li>
-                <el-tag type="success">C</el-tag>
-                <el-input
-                  placeholder="请输入选项C的内容"
-                  v-model="postChange.answerC"
-                  clearable="">
-                </el-input>
-              </li>
-              <li>
-                <el-tag type="success">D</el-tag>
-                <el-input
-                  placeholder="请输入选项D的内容"
-                  v-model="postChange.answerD"
-                  clearable="">
+                    :placeholder="'请输入选项' + right.label + '的内容'"
+                    v-model="postChange['answer' + right.value]"
+                    clearable="">
                 </el-input>
               </li>
             </ul>
+            <el-button type="primary" @click="handleAdd">添加选项</el-button>
+            <el-button type="danger" @click="handleMinus">删除选项</el-button>
           </div>
           <div class="title">
             <el-tag>解析:</el-tag><span>在下面的输入框中输入题目解析</span>
@@ -254,8 +205,19 @@
 </template>
 
 <script>
+import {createQuestion} from "../../api/questions.ts";
+import {useRoute} from "vue-router";
+import {ref} from "vue";
+
 export default {
   name : 'AddAnswerChildren',
+  setup() {
+    const route = useRoute(); // 获取当前路由信息
+    const courseId = route.params.id?.toString() || ''; // 从路由参数解析 id
+    return {
+      courseId
+    }
+  },
   data() {
     return {
       changeNumber: null, //选择题出题数量
@@ -293,24 +255,16 @@ export default {
       difficultyValue: '简单',
       levels: [ //难度等级
         {
-          value: '1',
-          label: '1'
+          value: '简单',
+          label: '简单'
         },
         {
-          value: '2',
-          label: '2'
+          value: '一般',
+          label: '一般'
         },
         {
-          value: '3',
-          label: '3'
-        },
-        {
-          value: '4',
-          label: '4'
-        },
-        {
-          value: '5',
-          label: '5'
+          value: '困难',
+          label: '困难'
         },
       ],
       rights: [ //正确答案
@@ -322,43 +276,27 @@ export default {
           value: 'B',
           label: 'B'
         },
-        {
-          value: 'C',
-          label: 'C'
-        },
-        {
-          value: 'D',
-          label: 'D'
-        },
       ],
-      paperId: null,
       optionValue: '选择题', //题型选中值
       subject: '', //试卷名称用来接收路由参数
       postChange: { //选择题提交内容
-        subject: '', //试卷名称
         level: '', //难度等级选中值 
         rightAnswer: '', //正确答案选中值
-        section: '', //对应章节
         question: '', //题目
         analysis: '', //解析
         answerA: '',
         answerB: '',
-        answerC: '',
-        answerD: '',
       },
       postFill: { //填空题提交内容
         subject: '', //试卷名称
         level: '', //难度等级选中值 
         answer: '', //正确答案
-        section: '', //对应章节
         question: '', //题目
         analysis: '', //解析
       },
       postJudge: { //判断题提交内容
-        subject: '', //试卷名称
         level: '', //难度等级选中值 
         answer: '', //正确答案
-        section: '', //对应章节
         question: '', //题目
         analysis: '', //解析
       },
@@ -376,138 +314,104 @@ export default {
     // handleClick(tab, event) {
     //   console.log(tab, event);
     // },
-    create() {
-      this.$axios({
-        url: '/api/item',
-        method: 'post',
-        data: {
-          changeNumber: this.changeNumber,
-          fillNumber: this.fillNumber,
-          judgeNumber: this.judgeNumber,
-          paperId: this.paperId,
-          subject: '计算机网络' //题目数量太少，指定为计算机网络出题
-        }
-      }).then(res => {
-        console.log(res)
-        let data = res.data
-        if(data.code==200){
-          setTimeout(() => {
-            this.$router.push({path: '/selectAnswer'})
-          },1000)
-           this.$message({
-            message: data.message,
-            type: 'success'
-          })
-        }else if(data.code==400){
-            this.$message({
-            message: data.message,
-            type: 'error'
-          })
-        }
-
+    handleAdd(){
+      const last = this.rights[this.rights.length - 1]
+      const char = String.fromCharCode(last.value.charCodeAt() + 1)
+      if(char > 'Z'){
+        this.$message({
+          message: '选项不能超过26个',
+          type: 'warning'
+        })
+        return
+      }
+      this.rights.push({
+        value: char,
+        label: char
       })
+      this.postChange['answer' + char] = ''
+    },
+    handleMinus(){
+      if(this.rights.length > 0){
+        this.rights.pop()
+        this.postChange['answer' + this.rights[this.rights.length - 1].value] = ''
+      }
     },
     getParams() {
-      let subject = this.$route.query.subject //获取试卷名称
       let paperId = this.$route.query.paperId //获取paperId
       this.paperId = paperId
-      this.subject = subject
       this.postPaper.paperId = paperId
     },
     changeSubmit() { //选择题题库提交
-      this.postChange.subject = this.subject
-      this.$axios({ //提交数据到选择题题库表
-        url: '/api/MultiQuestion',
-        method: 'post',
-        data: {
-          ...this.postChange          
+      const options = {}
+      for(let key in this.postChange){
+        if(key.startsWith('answer')){
+          options[key] = this.postChange[key]
         }
-      }).then(res => { //添加成功显示提示
-        let status = res.data.code
-        if(status == 200) {
+      }
+      const createCourse = {}
+      createCourse.options = JSON.stringify(options)
+      createCourse.questionLevel = this.postChange.level
+      createCourse.questionType = "choice"
+      createCourse.courseId = this.courseId
+      createCourse.question = this.postChange.question
+      createCourse.explanation = this.postChange.analysis
+      createCourse.answers = this.postChange.rightAnswer
+      createQuestion(createCourse).then(res => {
+        if(res.code === 200){
           this.$message({
-            message: '已添加到题库',
+            message: '添加成功',
             type: 'success'
           })
-          this.postChange = {}
-        }
-      }).then(() => {
-        this.$axios(`/api/multiQuestionId`).then(res => { //获取当前题目的questionId
-          let questionId = res.data.data.questionId
-          this.postPaper.questionId = questionId
-          this.postPaper.questionType = 1
-          this.$axios({
-            url: '/api/paperManage',
-            method: 'Post',
-            data: {
-              ...this.postPaper
-            }
+        }else{
+          this.$message({
+            message: '添加失败',
+            type: 'error'
           })
-        })
+        }
       })
     },
     fillSubmit() { //填空题提交
-      this.postFill.subject = this.subject
-      this.$axios({
-        url: '/api/fillQuestion',
-        method: 'post',
-        data: {
-          ...this.postFill
-        }
-      }).then(res => {
-        let status = res.data.code
-        if(status == 200) {
+      const createCourse = {}
+      createCourse.questionLevel = this.postFill.level
+      createCourse.questionType = "fill"
+      createCourse.courseId = this.courseId
+      createCourse.question = this.postFill.question
+      createCourse.explanation = this.postFill.analysis
+      createCourse.answers = this.postFill.answer
+      createQuestion(createCourse).then(res => {
+        if(res.code === 200){
           this.$message({
-            message: '已添加到题库',
+            message: '添加成功',
             type: 'success'
           })
-          this.postFill = {}
-        }
-      }).then(() => {
-        this.$axios(`/api/fillQuestionId`).then(res => { //获取当前题目的questionId
-          let questionId = res.data.data.questionId
-          this.postPaper.questionId = questionId
-          this.postPaper.questionType = 2
-          this.$axios({
-            url: '/api/paperManage',
-            method: 'Post',
-            data: {
-              ...this.postPaper
-            }
+        }else{
+          this.$message({
+            message: '添加失败',
+            type: 'error'
           })
-        })
+        }
       })
     },
     judgeSubmit() { //判断题提交
-      this.postJudge.subject = this.subject
-      this.$axios({
-        url: '/api/judgeQuestion',
-        method: 'post',
-        data: {
-          ...this.postJudge
-        }
-      }).then(res => {
-        let status = res.data.code
-        if(status == 200) {
+      const createCourse = {}
+      createCourse.questionLevel = this.postJudge.level
+      createCourse.questionType = "judge"
+      createCourse.courseId = this.courseId
+      createCourse.question = this.postJudge.question
+      createCourse.explanation = this.postJudge.analysis
+      createCourse.answers = this.postJudge.answer
+      createQuestion(createCourse).then(res => {
+        if(res.code === 200){
           this.$message({
-            message: '已添加到题库',
+            message: '添加成功',
             type: 'success'
           })
-          this.postJudge = {}
-        }
-      }).then(() => {
-        this.$axios(`/api/judgeQuestionId`).then(res => { //获取当前题目的questionId
-          let questionId = res.data.data.questionId
-          this.postPaper.questionId = questionId
-          this.postPaper.questionType = 3
-          this.$axios({
-            url: '/api/paperManage',
-            method: 'Post',
-            data: {
-              ...this.postPaper
-            }
+        }else{
+          this.$message({
+            message: '添加失败',
+            type: 'error'
           })
-        })
+        }
       })
     }
   },

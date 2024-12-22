@@ -63,10 +63,17 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
-import {getMyCreatedCourses} from "../../api/course.ts";
+import {deleteCourse, getMyCreatedCourses} from "../../api/course.ts";
 
 export default defineComponent({
   name: 'CoursesTable',
+  methods: {
+    // 编辑课程
+    handleEdit(course: any) : void {
+      // 路由跳转
+      this.$router.push(`/questions/list/${course.id}`)
+    }
+  },
   setup() {
     const courses = ref([]); // 表格数据
     const total = ref(0); // 数据总数
@@ -95,14 +102,16 @@ export default defineComponent({
       fetchCourses();
     };
 
-    // 编辑课程
-    const handleEdit = (course: any) => {
-      ElMessage.info(`编辑课程: ${course.courseName}`);
-    };
-
     // 删除课程
     const handleDelete = (course: any) => {
-      ElMessage.warning(`删除课程: ${course.courseName}`);
+      deleteCourse(course.id).then(res => {
+        if(res.code == 200){
+          ElMessage.success('删除成功');
+        }else{
+          ElMessage.error('删除失败');
+        }
+        fetchCourses();
+      })
     };
 
     // 初始化加载数据
@@ -117,7 +126,6 @@ export default defineComponent({
       pageSize,
       loading,
       handlePageChange,
-      handleEdit,
       handleDelete,
     };
   },

@@ -34,6 +34,18 @@ const router = createRouter({
                     meta: { requiresAuth: true }
                 },
                 {
+                    path: '/questions/:id',
+                    name: 'addAnswerChildren',
+                    component: () => import('./views/questions/addAnswerChildren.vue'),
+                    meta: { requiresAuth: true }
+                },
+                {
+                    path: '/questions/list/:id',
+                    name: 'manageQuestion',
+                    component: () => import('./views/questions/manageQuestion.vue'),
+                    meta: { requiresAuth: true }
+                },
+                {
                     path: 'announcements',
                     name: 'announcements',
                     component: () => import('./views/announcements/index.vue'),

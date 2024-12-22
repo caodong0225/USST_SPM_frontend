@@ -60,7 +60,7 @@ import {getPapers} from "../../api/paper.ts";
 import CreateAnnouncement from "./components/createAnnouncement.vue";
 import {useUserInfoStore} from "../../store";
 import Students from "./components/students.vue";
-import AddAnswerChildren from "../questions/components/addAnswerChildren.vue";
+import AddAnswerChildren from "../questions/addAnswerChildren.vue";
 
 export default defineComponent({
   name: 'CourseDetails',

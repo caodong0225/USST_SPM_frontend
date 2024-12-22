@@ -32,6 +32,14 @@ export const addCourse = (course: any) => {
     });
 }
 
+export const deleteCourse = (courseId: number) => {
+    return request({
+        url: `/course/delete/${courseId}`,
+        method: 'delete'
+    });
+
+}
+
 export const getCourseParticipate = (courseId: number) => {
     return request({
         url: `/course/participants/list/${courseId}`,
