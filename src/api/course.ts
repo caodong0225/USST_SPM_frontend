@@ -38,3 +38,24 @@ export const getCourseParticipate = (courseId: number) => {
         method: 'get'
     });
 }
+
+export const addCourseParticipate = (courseId: number, userId: number) => {
+    return request({
+        url: `/course/participants/add/${courseId}?userId=${userId}`,
+        method: 'post'
+    });
+}
+
+export const deleteCourseParticipate = (courseId: number, userId: number) => {
+    return request({
+        url: `/course/participants/delete/${courseId}?userId=${userId}`,
+        method: 'delete'
+    });
+}
+
+export const getMyCreatedCourses = (current: number , page:number) => {
+    return request({
+        url: `/course/myCreated/list?pageNum=${current}&pageSize=${page}`,
+        method: 'get'
+    });
+}

@@ -255,6 +255,7 @@
 
 <script>
 export default {
+  name : 'AddAnswerChildren',
   data() {
     return {
       changeNumber: null, //选择题出题数量

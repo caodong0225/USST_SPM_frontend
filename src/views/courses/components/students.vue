@@ -1,7 +1,7 @@
 <template>
   <div class="student-page">
     <!-- 按钮：打开选择学生的弹窗 -->
-    <el-button type="primary" @click="openDialog">选择学生</el-button>
+    <el-button type="primary" @click="openDialog" v-if="isAdmin">编辑学生</el-button>
 
     <!-- 弹窗 -->
     <el-dialog
@@ -15,18 +15,18 @@
           border
           style="width: 100%"
       >
-        <el-table-column prop="id" label="id" width="100" />
+        <el-table-column prop="id" label="id" />
         <el-table-column prop="nickname" label="姓名" />
         <el-table-column prop="username" label="用户名" />
         <el-table-column label="操作" width="150">
           <template #default="scope">
             <el-button
                 size="small"
-                type="success"
-                @click="addStudent(scope.row)"
-                :disabled="isAdded(scope.row.id)"
+                :type="isAdded(scope.row.id) ? 'danger' : 'success'"
+                @click="isAdded(scope.row.id) ? deleteStudent(scope.row) : addStudent(scope.row)"
+                :disabled = "scope.row.roleName != null"
             >
-              {{ isAdded(scope.row.id) ? "已添加" : "添加学生" }}
+              {{ isAdded(scope.row.id) ? "删除学生" : "添加学生" }}
             </el-button>
           </template>
         </el-table-column>
@@ -54,8 +54,10 @@
         border
         style="margin-top: 20px; width: 100%"
     >
-      <el-table-column prop="id" label="学号" width="100" />
-      <el-table-column prop="name" label="姓名" />
+      <el-table-column prop="users.id" label="id" />
+      <el-table-column prop="users.nickname" label="姓名" />
+      <el-table-column prop="users.email" label="邮箱" />
+      <el-table-column prop="courseParticipants.status" label="状态" />
     </el-table>
   </div>
 </template>
@@ -63,7 +65,9 @@
 <script lang="ts">
 import {defineComponent, ref} from "vue";
 import {getUserList} from "../../../api/user.ts";
-import {getCourseParticipate} from "../../../api/course.ts";
+import {addCourseParticipate, deleteCourseParticipate, getCourseParticipate} from "../../../api/course.ts";
+import {useUserInfoStore} from "../../../store";
+import {ElMessage} from "element-plus";
 
 export default defineComponent({
   name: "Students",
@@ -85,6 +89,11 @@ export default defineComponent({
     const addedStudents = ref<any>(); // 课程详细信息
     const currentPage = ref<number>(1); // 课程详细信息
     const pageSize = ref<number>(5); // 课程详细信息
+    const userInfoStore = useUserInfoStore()
+    const isAdmin = ref(false);
+    if (userInfoStore.userInfo.role > 0) {
+      isAdmin.value = true;
+    }
     const fetchStudentList = async (current:number,size:number) => {
       const {data: res} = await getUserList(current,size);
       studentList.value = res.records;
@@ -100,32 +109,53 @@ export default defineComponent({
       currentPage.value = page;
       fetchStudentList(currentPage.value,pageSize.value);
     };
+    const isAdded = (studentId : number) => {
+      // 检查学生是否已经添加
+      for(let student of addedStudents.value) {
+        if (student?.users.id === studentId) {
+          return true;
+        }
+      }
+      return false;
+    };
+    const addStudent = async(student : any) => {
+      const res = await addCourseParticipate(props.courseId, student.id);
+      // 如果res包含成功字段
+      if (res.code == 200) {
+        ElMessage.success("添加成功");
+      } else {
+        ElMessage.error(res.data);
+      }
+      await getCourseParticipatedStudents();
+      await fetchStudentList(currentPage.value, pageSize.value);
+    };
+    const deleteStudent = async(student : any) => {
+      // 删除学生
+      const res = await deleteCourseParticipate(props.courseId, student.id);
+      // 如果res包含成功字段
+      if (res.code == 200) {
+        ElMessage.success("删除成功");
+      } else {
+        ElMessage.error(res.data);
+      }
+      await getCourseParticipatedStudents();
+      await fetchStudentList(currentPage.value, pageSize.value);
+    };
     return {
       studentList,
       addedStudents,
       currentPage,
       pageSize,
-      handlePageChange
+      isAdmin,
+      handlePageChange,
+      addStudent,
+      isAdded,
+      deleteStudent,
     }
   },
   methods: {
     openDialog() {
       this.dialogVisible = true; // 打开弹窗
-    },
-    addStudent(student) {
-      // 如果学生未添加到已选择列表中，则添加
-      if (!this.isAdded(student.id)) {
-        this.addedStudents.push(student);
-      }
-    },
-    isAdded(studentId) {
-      // 检查学生是否已经添加
-      for(let student of this.addedStudents) {
-        if (student?.id === studentId) {
-          return true;
-        }
-      }
-      return false;
     },
   },
 });

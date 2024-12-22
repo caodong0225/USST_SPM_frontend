@@ -33,6 +33,11 @@ const menuList = [
     path: '/settings',
     icon: 'setting',
   },
+  {
+    title: '我的题库',
+    path: '/questions',
+    icon: 'DocumentCopy',
+  },
 ]
 
 const form = reactive({

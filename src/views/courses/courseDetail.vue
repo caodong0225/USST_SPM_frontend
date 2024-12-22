@@ -41,9 +41,6 @@
         >
           <el-button class="nav-item" tabindex="0" :icon="item.icon">{{ item.label }}</el-button>
         </li>
-        <li :class="{ 'active': activeIndex === 3 }" v-if = "isAdmin">
-          <el-button class="nav-item" tabindex="0" @click="changeIndex(3)" icon="Grid">题库</el-button>
-        </li>
       </ul>
       <TableWithPagination :table-data="paperInfo" :course-id="courseId" v-if = "activeIndex == 0"/>
       <CreateAnnouncement :course-id="courseId" v-if = "activeIndex == 1"/>
@@ -63,10 +60,11 @@ import {getPapers} from "../../api/paper.ts";
 import CreateAnnouncement from "./components/createAnnouncement.vue";
 import {useUserInfoStore} from "../../store";
 import Students from "./components/students.vue";
+import AddAnswerChildren from "../questions/components/addAnswerChildren.vue";
 
 export default defineComponent({
   name: 'CourseDetails',
-  components: {Students, CreateAnnouncement, TableWithPagination, CourseInformation},
+  components: {AddAnswerChildren, Students, CreateAnnouncement, TableWithPagination, CourseInformation},
   methods: {
     goBack(): void {
       this.$router.push(`/courses`); // 跳转到课程详情页

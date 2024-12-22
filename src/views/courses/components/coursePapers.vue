@@ -100,7 +100,6 @@ export default {
 
     const handleDelete = (row) => {
       deletePaper(row.id).then(res => {
-        console.log(res)
         if(res.code === 200){
           ElMessage.success('删除成功');
           // 刷新当前组件的数据信息

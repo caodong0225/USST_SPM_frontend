@@ -28,6 +28,12 @@ const router = createRouter({
                     meta: { requiresAuth: true }
                 },
                 {
+                    path: 'questions',
+                    name: 'questions',
+                    component: () => import('./views/questions/index.vue'),
+                    meta: { requiresAuth: true }
+                },
+                {
                     path: 'announcements',
                     name: 'announcements',
                     component: () => import('./views/announcements/index.vue'),
