@@ -1,15 +1,16 @@
 <template>
   <div id="message">
-    <div class="title">创建公告</div>
+    <div class="title" v-if = "isAdmin">创建公告</div>
+    <div class="title" v-else>公告列表</div>
     <div class="wrapper">
-      <div class="title1">
+      <div class="title1" v-if = "isAdmin">
         <el-input
           placeholder="公告标题"
           v-model="title"
           clearable>
         </el-input>
       </div>
-      <div class="content">
+      <div class="content" v-if = "isAdmin">
         <el-input
           type="textarea"
           :rows="3"
@@ -18,7 +19,7 @@
           clearable>
         </el-input>
       </div>
-      <div class="btn">
+      <div class="btn" v-if = "isAdmin">
         <el-button type="primary" @click="submit()">发布公告</el-button>
       </div>
       <div class="all">
@@ -56,6 +57,8 @@
 <script>
 import {createAnnouncement, fetchCourseAnnouncement} from "../../../api/announcement.ts";
 import {ElMessage} from "element-plus";
+import {ref} from "vue";
+import {useUserInfoStore} from "../../../store/index.ts";
 
 export default {
   name: 'CreateAnnouncement',
@@ -131,6 +134,16 @@ export default {
   },
   created() {
     this.getMsg()
+  },
+  setup() {
+    const isAdmin = ref(false);
+    const userInfoStore = useUserInfoStore();
+    if (userInfoStore.userInfo.role > 0) {
+      isAdmin.value = true;
+    }
+    return {
+      isAdmin
+    }
   }
 }
 </script>

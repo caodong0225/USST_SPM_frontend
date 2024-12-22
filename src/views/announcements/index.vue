@@ -72,8 +72,9 @@ export default defineComponent({
 
     const getAnnouncements = async () => {
       const {data : res} = await fetchAnnouncement(currentPage.value, itemsPerPage.value);
-      totalNum.value = res.total;
-      announcements.value = res.records;
+      totalNum.value = res.length;
+      console.log(res)
+      announcements.value = res;
     }
 
     getAnnouncements();

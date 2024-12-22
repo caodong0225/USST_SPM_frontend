@@ -31,3 +31,10 @@ export const addCourse = (course: any) => {
         data: course
     });
 }
+
+export const getCourseParticipate = (courseId: number) => {
+    return request({
+        url: `/course/participants/list/${courseId}`,
+        method: 'get'
+    });
+}

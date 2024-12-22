@@ -4,7 +4,7 @@
     <div class="announcement-meta">
       <span class="course-name">{{info.course.courseName}}</span>
       <time class="creation-time">{{info.announcement.createdAt}}</time>
-      <span class="teacher-name">{{info.users.nickname}}</span>
+      <span class="teacher-name">{{info.user.nickname}}</span>
       <div class="meta-content"></div>
     </div>
     <p class="announcement-content">{{info.announcement.content}}</p>
@@ -22,7 +22,7 @@ interface AnnouncementInfo {
   course: {
     courseName: string;
   };
-  users: {
+  user: {
     nickname: string;
   };
 }

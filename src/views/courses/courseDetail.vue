@@ -49,6 +49,7 @@
       <CreateAnnouncement :course-id="courseId" v-if = "activeIndex == 1"/>
     </nav>
     <CourseInformation v-if = "subView == 1" :course-info="courseInfo"/>
+    <Students v-if = "subView == 2"  :course-id="courseId"/>
   </main>
 </template>
 
@@ -61,10 +62,11 @@ import TableWithPagination from "./components/coursePapers.vue";
 import {getPapers} from "../../api/paper.ts";
 import CreateAnnouncement from "./components/createAnnouncement.vue";
 import {useUserInfoStore} from "../../store";
+import Students from "./components/students.vue";
 
 export default defineComponent({
   name: 'CourseDetails',
-  components: {CreateAnnouncement, TableWithPagination, CourseInformation},
+  components: {Students, CreateAnnouncement, TableWithPagination, CourseInformation},
   methods: {
     goBack(): void {
       this.$router.push(`/courses`); // 跳转到课程详情页

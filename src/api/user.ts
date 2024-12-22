@@ -14,3 +14,10 @@ export const getUserExtraInfo = (id: number) => {
         method: 'get'
     });
 }
+
+export const getUserList = (current?: number , size?:number) => {
+    return request({
+        url: `/user/list?current=${current}&size=${size}`,
+        method: 'get',
+    });
+}
