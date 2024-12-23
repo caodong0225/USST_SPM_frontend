@@ -72,6 +72,9 @@ export default {
   methods: {
     handleEdit(row) {
       this.$router.push(`/questions/list/${this.courseId}?paperId=${row.papers.id}`)
+    },
+    handleEntry(row) {
+      this.$router.push(`/papers/${row.papers.id}`)
     }
   },
   setup() {
@@ -96,10 +99,6 @@ export default {
       currentPage.value = page;
     };
 
-    const handleEntry = (row) =>{
-      console.log(row)
-    }
-
     const handleDelete = (row) => {
       deletePaper(row.id).then(res => {
         if(res.code === 200){
@@ -118,7 +117,6 @@ export default {
       pageSize,
       isAdmin,
       addPaper,
-      handleEntry,
       handlePageChange,
       handleDelete,
     };

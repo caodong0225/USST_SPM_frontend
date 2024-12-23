@@ -232,7 +232,11 @@ export default {
     },
     addQuestion() {
       // 页面跳转
-      this.$router.push({path: `/questions/${this.courseId}`})
+      if(this.paperId != null) {
+        this.$router.push(`/questions/${this.courseId}?paperId=${this.paperId}`)
+      } else {
+        this.$router.push(`/questions/${this.courseId}`)
+      }
     },
     getAddedData(paperId) {
       getAddedQuestions(paperId).then(res => {

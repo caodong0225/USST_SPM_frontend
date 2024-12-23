@@ -224,8 +224,10 @@ export default {
   setup() {
     const route = useRoute(); // 获取当前路由信息
     const courseId = route.params.id?.toString() || ''; // 从路由参数解析 id
+    const paperId = route.params.paperId?.toString || null
     return {
-      courseId
+      courseId,
+      paperId
     }
   },
   data() {
@@ -325,7 +327,11 @@ export default {
     //   console.log(tab, event);
     // },
     returnBack() {
-      this.$router.push(`/questions/list/${this.courseId}`)
+      if(this.paperId == null){
+        this.$router.push(`/questions/list/${this.courseId}`)
+      }else{
+        this.$router.push(`/questions/list/${this.courseId}?paperId=${this.paperId}`)
+      }
     },
     handleAdd() {
       const last = this.rights[this.rights.length - 1]
