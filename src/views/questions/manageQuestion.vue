@@ -59,6 +59,7 @@
             <p>{{ title }}</p>
             <i class="iconfont icon-right auto-right"></i>
             <span>共{{ examData.length }}题  <i class="iconfont icon-time"></i></span>
+            <span v-if="paperId != null">已选择{{selectedNum}}题</span>
           </div>
           <div class="content" v-if="examData.length > 0">
             <p class="topic"><span class="number">{{ number }}</span>{{ showQuestion.questionName }}</p>
@@ -114,6 +115,11 @@
           <div class="operation" v-if="examData.length>0">
             <ul class="end">
               <li @click="previous()"><i class="iconfont icon-previous"></i><span>上一题</span></li>
+              <div v-if="paperId!=null">
+                <li @click="mark()" v-if="!this.topic[this.currentType][this.index]['isMark']"><i
+                    class="iconfont icon-mark-o"></i><span>选择题目</span></li>
+                <li @click="unmark()" v-else><i class="iconfont icon-mark-o"></i><span>取消选择</span></li>
+              </div>
               <li @click="next()"><span>下一题</span><i class="iconfont icon-next"></i></li>
             </ul>
           </div>
@@ -127,6 +133,7 @@
 import {useRoute} from "vue-router";
 import {deleteQuestion, getQuestionList} from "../../api/questions.ts";
 import {ElMessage} from "element-plus";
+import {addPaperQuestion, deletePaperQuestion, getAddedQuestions} from "../../api/paper.ts";
 
 export default {
   name: "manageQuestion",
@@ -139,6 +146,7 @@ export default {
       slider_flag: true, //左侧显示隐藏标识符
       flag: false, //个人信息显示隐藏标识符
       currentType: 1, //当前题型类型  1--选择题  2--填空题  3--判断题
+      selectedNum: 0,
       radio: [], //保存考生所有选择题的选项
       title: "题目列表",
       index: 0, //全局index
@@ -166,14 +174,45 @@ export default {
   setup() {
     const route = useRoute(); // 获取当前路由信息
     const courseId = route.params.id?.toString() || ''; // 从路由参数解析 id
+    const paperId = route.query?.paperId || null // 从路由参数解析 paperId
     return {
-      courseId
+      courseId,
+      paperId
     }
   },
   created() {
     this.getExamData()
+    if (this.paperId != null) {
+      this.getAddedData(this.paperId)
+    }
   },
   methods: {
+    mark() { //标记功能
+      addPaperQuestion(this.paperId, {"questionId": this.topic[this.currentType][this.index].id}).then(res => {
+        if (res.code === 200) {
+          ElMessage.success('添加成功')
+          this.topic[this.currentType][this.index]["isMark"] = true //标记
+          this.selectedNum++;
+        } else {
+          ElMessage.error(res.message)
+        }
+      }).catch(error => {
+        ElMessage.error("添加失败")
+      })
+    },
+    unmark() { //取消标记
+      deletePaperQuestion(this.paperId, this.topic[this.currentType][this.index].id).then(res => {
+        if (res.code === 200) {
+          ElMessage.success('删除成功')
+          this.topic[this.currentType][this.index]["isMark"] = false //取消标记
+          this.selectedNum--;
+        } else {
+          ElMessage.error(res.message)
+        }
+      }).catch(error => {
+        ElMessage.error("删除失败")
+      })
+    },
     deleteQuestion() {
       deleteQuestion(this.topic[this.currentType][this.index].id).then(res => {
         if (res.code === 200) {
@@ -187,11 +226,33 @@ export default {
         } else {
           ElMessage.error('删除失败')
         }
+      }).catch(error => {
+        ElMessage.error("删除失败")
       })
     },
     addQuestion() {
       // 页面跳转
       this.$router.push({path: `/questions/${this.courseId}`})
+    },
+    getAddedData(paperId) {
+      getAddedQuestions(paperId).then(res => {
+        if (res.code === 200) {
+          this.selectedNum = res.data.length
+          for (let j = 0; j < res.data.length; j++) {
+            for (let k = 1; k <= 3; k++) {
+              for (let i = 0; i < this.topic[k].length; i++) {
+                if (res.data[j].questionId === this.topic[k][i].id) {
+                  this.topic[k][i]["isMark"] = true
+                }
+              }
+            }
+          }
+        } else {
+          ElMessage.error(res.message)
+        }
+      }).catch(error => {
+        ElMessage.error("请求失败")
+      })
     },
     getExamData() { //获取当前试卷所有信息
       getQuestionList(parseInt(this.courseId)).then(res => {

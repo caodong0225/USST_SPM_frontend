@@ -21,3 +21,24 @@ export const deletePaper = (id: string) => {
         method: 'delete',
     });
 }
+export const getAddedQuestions = (paperId: string) => {
+    return request({
+        url: `/paper/${paperId}/questions/list`,
+        method: 'get',
+    });
+}
+
+export const addPaperQuestion = (paperId: string, data: any) => {
+    return request({
+        url: `/paper/${paperId}/questions/add`,
+        method: 'post',
+        data,
+    });
+}
+
+export const deletePaperQuestion = (paperId: string, questionId: string) => {
+    return request({
+        url: `/paper/${paperId}/questions/delete/${questionId}`,
+        method: 'delete',
+    });
+}

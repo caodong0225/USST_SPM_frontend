@@ -69,6 +69,11 @@ export default {
       required: true,
     }
   },
+  methods: {
+    handleEdit(row) {
+      this.$router.push(`/questions/list/${this.courseId}?paperId=${row.papers.id}`)
+    }
+  },
   setup() {
     const columns = ref([
       { label: "测试ID", prop: "papers.id"},
@@ -89,10 +94,6 @@ export default {
     }
     const handlePageChange = (page) => {
       currentPage.value = page;
-    };
-
-    const handleEdit = (row) => {
-      alert(`编辑用户：${row.username}`);
     };
 
     const handleEntry = (row) =>{
@@ -119,7 +120,6 @@ export default {
       addPaper,
       handleEntry,
       handlePageChange,
-      handleEdit,
       handleDelete,
     };
   },
