@@ -14,3 +14,10 @@ export const getQuestionList = (courseId: number)=> {
         method: 'get',
     });
 }
+
+export const deleteQuestion = (questionId: number) => {
+    return request({
+        url: `/question/delete/${questionId}`,
+        method: 'delete',
+    });
+}

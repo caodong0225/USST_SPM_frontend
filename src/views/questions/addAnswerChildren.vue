@@ -2,205 +2,215 @@
 <template>
   <div class="add">
     <el-tabs v-model="activeName">
-    <el-tab-pane name="first">
-      <span slot="label"><i class="el-icon-circle-plus"></i>添加试题</span>
-      <section class="append">
-        <ul>
-          <li>
-            <span>题目类型:</span>
-            <el-select v-model="optionValue" placeholder="请选择题型" class="w150">
-              <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-          </li>
-          <li v-if="optionValue == '选择题'">
-            <span>难度等级:</span>
-            <el-select v-model="postChange.level" placeholder="选择难度等级" class="w150">
-              <el-option
-                v-for="item in levels"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-          </li>
-          <li v-if="optionValue == '填空题'">
-            <span>难度等级:</span>
-            <el-select v-model="postFill.level" placeholder="选择难度等级" class="w150">
-              <el-option
-                v-for="item in levels"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-          </li>
-          <li v-if="optionValue == '判断题'">
-            <span>难度等级:</span>
-            <el-select v-model="postJudge.level" placeholder="选择难度等级" class="w150">
-              <el-option
-                v-for="item in levels"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-          </li>
-          <li v-if="optionValue == '选择题'">
-            <span>正确选项:</span>
-            <el-select v-model="postChange.rightAnswer" placeholder="选择正确答案" class="w150">
-              <el-option
-                v-for="item in rights"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-          </li>
-        </ul>
-        <!-- 选择题部分 -->
-        <div class="change" v-if="optionValue == '选择题'">
-          <div class="title">
-            <el-tag>题目:</el-tag><span>在下面的输入框中输入题目,形如--DNS 服务器和DHCP服务器的作用是（）</span>
-            <el-input
-              type="textarea"
-              rows="4"
-              v-model="postChange.question"
-              placeholder="请输入题目内容"
-              resize="none"
-              class="answer">
-            </el-input>
+      <el-tab-pane name="first">
+        <el-button type="text" @click="returnBack">返回</el-button>
+        <span slot="label"><i class="el-icon-circle-plus"></i>添加试题</span>
+        <section class="append">
+          <ul>
+            <li>
+              <span>题目类型:</span>
+              <el-select v-model="optionValue" placeholder="请选择题型" class="w150">
+                <el-option
+                    v-for="item in options"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                </el-option>
+              </el-select>
+            </li>
+            <li v-if="optionValue == '选择题'">
+              <span>难度等级:</span>
+              <el-select v-model="postChange.level" placeholder="选择难度等级" class="w150">
+                <el-option
+                    v-for="item in levels"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                </el-option>
+              </el-select>
+            </li>
+            <li v-if="optionValue == '填空题'">
+              <span>难度等级:</span>
+              <el-select v-model="postFill.level" placeholder="选择难度等级" class="w150">
+                <el-option
+                    v-for="item in levels"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                </el-option>
+              </el-select>
+            </li>
+            <li v-if="optionValue == '判断题'">
+              <span>难度等级:</span>
+              <el-select v-model="postJudge.level" placeholder="选择难度等级" class="w150">
+                <el-option
+                    v-for="item in levels"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                </el-option>
+              </el-select>
+            </li>
+            <li v-if="optionValue == '选择题'">
+              <span>正确选项:</span>
+              <el-select v-model="postChange.rightAnswer" placeholder="选择正确答案" class="w150">
+                <el-option
+                    v-for="item in rights"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                </el-option>
+              </el-select>
+            </li>
+          </ul>
+          <!-- 选择题部分 -->
+          <div class="change" v-if="optionValue == '选择题'">
+            <div class="title">
+              <el-tag>题目:</el-tag>
+              <span>在下面的输入框中输入题目,形如--DNS 服务器和DHCP服务器的作用是（）</span>
+              <el-input
+                  type="textarea"
+                  rows="4"
+                  v-model="postChange.question"
+                  placeholder="请输入题目内容"
+                  resize="none"
+                  class="answer">
+              </el-input>
+            </div>
+            <div class="options">
+              <ul>
+                <li v-for="(right, index) in rights" :key="index">
+                  <el-tag type="success">{{ right.label }}</el-tag>
+                  <el-input
+                      :placeholder="'请输入选项' + right.label + '的内容'"
+                      v-model="postChange['answer' + right.value]"
+                      clearable="">
+                  </el-input>
+                </li>
+              </ul>
+              <el-button type="primary" @click="handleAdd">添加选项</el-button>
+              <el-button type="danger" @click="handleMinus">删除选项</el-button>
+            </div>
+            <div class="title">
+              <el-tag>解析:</el-tag>
+              <span>在下面的输入框中输入题目解析</span>
+              <el-input
+                  type="textarea"
+                  rows="4"
+                  v-model="postChange.analysis"
+                  placeholder="请输入答案解析"
+                  resize="none"
+                  class="answer">
+              </el-input>
+            </div>
+            <div class="submit">
+              <el-button type="primary" @click="changeSubmit()">立即添加</el-button>
+            </div>
           </div>
-          <div class="options">
-            <ul>
-              <li v-for="(right, index) in rights" :key="index">
-                <el-tag type="success">{{right.label}}</el-tag>
-                <el-input
-                    :placeholder="'请输入选项' + right.label + '的内容'"
-                    v-model="postChange['answer' + right.value]"
-                    clearable="">
-                </el-input>
-              </li>
-            </ul>
-            <el-button type="primary" @click="handleAdd">添加选项</el-button>
-            <el-button type="danger" @click="handleMinus">删除选项</el-button>
+          <!-- 填空题部分 -->
+          <div class="change fill" v-if="optionValue == '填空题'">
+            <div class="title">
+              <el-tag>题目:</el-tag>
+              <span>输入题目,形如--从计算机网络系统组成的角度看，计算机网络可以分为()和()。注意需要考生答题部分一定要用括号（英文半角）括起来。</span>
+              <el-input
+                  type="textarea"
+                  rows="4"
+                  v-model="postFill.question"
+                  placeholder="请输入题目内容"
+                  resize="none"
+                  class="answer">
+              </el-input>
+            </div>
+            <div class="fillAnswer">
+              <el-tag>正确答案:</el-tag>
+              <el-input v-model="postFill.answer"></el-input>
+            </div>
+            <div class="title analysis">
+              <el-tag type="success">解析:</el-tag>
+              <span>下方输入框中输入答案解析</span>
+              <el-input
+                  type="textarea"
+                  rows="4"
+                  v-model="postFill.analysis"
+                  placeholder="请输入答案解析"
+                  resize="none"
+                  class="answer">
+              </el-input>
+            </div>
+            <div class="submit">
+              <el-button type="primary" @click="fillSubmit()">立即添加</el-button>
+            </div>
           </div>
-          <div class="title">
-            <el-tag>解析:</el-tag><span>在下面的输入框中输入题目解析</span>
-            <el-input
-              type="textarea"
-              rows="4"
-              v-model="postChange.analysis"
-              placeholder="请输入答案解析"
-              resize="none"
-              class="answer">
-            </el-input>
+          <!-- 判断题 -->
+          <div class="change judge" v-if="optionValue === '判断题'">
+            <div class="title">
+              <el-tag>题目:</el-tag>
+              <span>在下面的输入框中输入题目</span>
+              <el-input
+                  type="textarea"
+                  rows="4"
+                  v-model="postJudge.question"
+                  placeholder="请输入题目内容"
+                  resize="none"
+                  class="answer">
+              </el-input>
+            </div>
+            <div class="judgeAnswer">
+              <el-radio v-model="postJudge.answer" label="T">正确</el-radio>
+              <el-radio v-model="postJudge.answer" label="F">错误</el-radio>
+            </div>
+            <div class="title">
+              <el-tag>解析:</el-tag>
+              <span>在下面的输入框中输入题目解析</span>
+              <el-input
+                  type="textarea"
+                  rows="4"
+                  v-model="postJudge.analysis"
+                  placeholder="请输入答案解析"
+                  resize="none"
+                  class="answer">
+              </el-input>
+            </div>
+            <div class="submit">
+              <el-button type="primary" @click="judgeSubmit()">立即添加</el-button>
+            </div>
           </div>
-          <div class="submit">
-            <el-button type="primary" @click="changeSubmit()">立即添加</el-button>
-          </div>
+        </section>
+      </el-tab-pane>
+      <el-tab-pane name="second">
+        <span slot="label"><i class="iconfont icon-daoru-tianchong"></i>在线组卷</span>
+        <div class="box">
+          <ul>
+            <li>
+              <span>试题难度:</span>
+              <el-select v-model="difficultyValue" placeholder="试题难度" class="w150">
+                <el-option
+                    v-for="item in difficulty"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                </el-option>
+              </el-select>
+            </li>
+            <li>
+              <span>选择题数量：</span>
+              <el-input type="text" v-model="changeNumber"></el-input>
+            </li>
+            <li>
+              <span>填空题数量：</span>
+              <el-input type="text" v-model="fillNumber"></el-input>
+            </li>
+            <li>
+              <span>判断题数量：</span>
+              <el-input type="text" v-model="judgeNumber"></el-input>
+            </li>
+            <li>
+              <el-button type="primary" @click="create()">立即组卷</el-button>
+            </li>
+          </ul>
         </div>
-        <!-- 填空题部分 -->
-        <div class="change fill" v-if="optionValue == '填空题'">
-          <div class="title">
-            <el-tag>题目:</el-tag><span>输入题目,形如--从计算机网络系统组成的角度看，计算机网络可以分为()和()。注意需要考生答题部分一定要用括号（英文半角）括起来。</span>
-            <el-input
-              type="textarea"
-              rows="4"
-              v-model="postFill.question"
-              placeholder="请输入题目内容"
-              resize="none"
-              class="answer">
-            </el-input>
-          </div>
-          <div class="fillAnswer">
-            <el-tag>正确答案:</el-tag>
-            <el-input v-model="postFill.answer"></el-input>
-          </div>
-          <div class="title analysis">
-            <el-tag type="success">解析:</el-tag><span>下方输入框中输入答案解析</span>
-            <el-input
-              type="textarea"
-              rows="4"
-              v-model="postFill.analysis"
-              placeholder="请输入答案解析"
-              resize="none"
-              class="answer">
-            </el-input>
-          </div>
-          <div class="submit">
-            <el-button type="primary" @click="fillSubmit()">立即添加</el-button>
-          </div>
-        </div>
-        <!-- 判断题 -->
-        <div class="change judge" v-if="optionValue == '判断题'">
-          <div class="title">
-            <el-tag>题目:</el-tag><span>在下面的输入框中输入题目</span>
-            <el-input
-              type="textarea"
-              rows="4"
-              v-model="postJudge.question"
-              placeholder="请输入题目内容"
-              resize="none"
-              class="answer">
-            </el-input>
-          </div>
-          <div class="judgeAnswer">
-            <el-radio v-model="postJudge.answer" label="T">正确</el-radio>
-            <el-radio v-model="postJudge.answer" label="F">错误</el-radio>
-          </div>
-          <div class="title">
-            <el-tag>解析:</el-tag><span>在下面的输入框中输入题目解析</span>
-            <el-input
-              type="textarea"
-              rows="4"
-              v-model="postJudge.analysis"
-              placeholder="请输入答案解析"
-              resize="none"
-              class="answer">
-            </el-input>
-          </div>
-          <div class="submit">
-            <el-button type="primary" @click="judgeSubmit()">立即添加</el-button>
-          </div>
-        </div>
-      </section>
-    </el-tab-pane>
-    <el-tab-pane name="second">
-      <span slot="label"><i class="iconfont icon-daoru-tianchong"></i>在线组卷</span>
-      <div class="box">
-        <ul>
-          <li>
-            <span>试题难度:</span>
-            <el-select v-model="difficultyValue" placeholder="试题难度" class="w150">
-              <el-option
-                v-for="item in difficulty"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-          </li>
-          <li>
-            <span>选择题数量：</span> <el-input type="text" v-model="changeNumber"></el-input>
-          </li>
-          <li>
-            <span>填空题数量：</span> <el-input type="text" v-model="fillNumber"></el-input>
-          </li>
-          <li>
-            <span>判断题数量：</span> <el-input type="text" v-model="judgeNumber"></el-input>
-          </li>
-          <li>
-            <el-button type="primary" @click="create()">立即组卷</el-button>
-          </li>
-        </ul>
-      </div>
-    </el-tab-pane>
-  </el-tabs>
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 
@@ -210,7 +220,7 @@ import {useRoute} from "vue-router";
 import {ref} from "vue";
 
 export default {
-  name : 'AddAnswerChildren',
+  name: 'AddAnswerChildren',
   setup() {
     const route = useRoute(); // 获取当前路由信息
     const courseId = route.params.id?.toString() || ''; // 从路由参数解析 id
@@ -314,10 +324,13 @@ export default {
     // handleClick(tab, event) {
     //   console.log(tab, event);
     // },
-    handleAdd(){
+    returnBack() {
+      this.$router.push(`/questions/list/${this.courseId}`)
+    },
+    handleAdd() {
       const last = this.rights[this.rights.length - 1]
       const char = String.fromCharCode(last.value.charCodeAt() + 1)
-      if(char > 'Z'){
+      if (char > 'Z') {
         this.$message({
           message: '选项不能超过26个',
           type: 'warning'
@@ -330,8 +343,8 @@ export default {
       })
       this.postChange['answer' + char] = ''
     },
-    handleMinus(){
-      if(this.rights.length > 0){
+    handleMinus() {
+      if (this.rights.length > 0) {
         this.rights.pop()
         this.postChange['answer' + this.rights[this.rights.length - 1].value] = ''
       }
@@ -343,8 +356,8 @@ export default {
     },
     changeSubmit() { //选择题题库提交
       const options = {}
-      for(let key in this.postChange){
-        if(key.startsWith('answer')){
+      for (let key in this.postChange) {
+        if (key.startsWith('answer')) {
           options[key] = this.postChange[key]
         }
       }
@@ -354,15 +367,16 @@ export default {
       createCourse.questionType = "choice"
       createCourse.courseId = this.courseId
       createCourse.question = this.postChange.question
-      createCourse.explanation = this.postChange.analysis
+      createCourse.explanation = this.postChange.analysis === "" ? this.postChange.analysis : null
       createCourse.answers = this.postChange.rightAnswer
       createQuestion(createCourse).then(res => {
-        if(res.code === 200){
+        if (res.code === 200) {
           this.$message({
             message: '添加成功',
             type: 'success'
           })
-        }else{
+          this.clearData()
+        } else {
           this.$message({
             message: '添加失败',
             type: 'error'
@@ -376,15 +390,16 @@ export default {
       createCourse.questionType = "fill"
       createCourse.courseId = this.courseId
       createCourse.question = this.postFill.question
-      createCourse.explanation = this.postFill.analysis
+      createCourse.explanation = this.postFill.analysis === "" ? this.postFill.analysis : null
       createCourse.answers = this.postFill.answer
       createQuestion(createCourse).then(res => {
-        if(res.code === 200){
+        if (res.code === 200) {
           this.$message({
             message: '添加成功',
             type: 'success'
           })
-        }else{
+          this.clearData()
+        } else {
           this.$message({
             message: '添加失败',
             type: 'error'
@@ -398,21 +413,45 @@ export default {
       createCourse.questionType = "judge"
       createCourse.courseId = this.courseId
       createCourse.question = this.postJudge.question
-      createCourse.explanation = this.postJudge.analysis
+      createCourse.explanation = this.postJudge.analysis === "" ? this.postJudge.analysis : null
       createCourse.answers = this.postJudge.answer
       createQuestion(createCourse).then(res => {
-        if(res.code === 200){
+        if (res.code === 200) {
           this.$message({
             message: '添加成功',
             type: 'success'
           })
-        }else{
+          this.clearData()
+        } else {
           this.$message({
             message: '添加失败',
             type: 'error'
           })
         }
       })
+    },
+    clearData() {
+      this.postChange = { //选择题提交内容
+        level: '', //难度等级选中值
+        rightAnswer: '', //正确答案选中值
+        question: '', //题目
+        analysis: '', //解析
+        answerA: '',
+        answerB: '',
+      };
+      this.postFill = { //填空题提交内容
+        subject: '', //试卷名称
+        level: '', //难度等级选中值
+        answer: '', //正确答案
+        question: '', //题目
+        analysis: '', //解析
+      };
+      this.postJudge = { //判断题提交内容
+        level: '', //难度等级选中值
+        answer: '', //正确答案
+        question: '', //题目
+        analysis: '', //解析
+      };
     }
   },
 };
@@ -421,102 +460,127 @@ export default {
 <style lang="less" scoped>
 .add {
   margin: 0px 40px;
+
   .box {
     padding: 0px 20px;
+
     ul li {
       margin: 10px 0px;
       display: flex;
       align-items: center;
+
       .el-input {
         width: 6%;
       }
+
       .w150 {
         margin-left: 20px;
         width: 7%;
       }
     }
   }
+
   .el-icon-circle-plus {
     margin-right: 10px;
   }
+
   .icon-daoru-tianchong {
     margin-right: 10px;
   }
+
   .append {
     margin: 0px 20px;
+
     ul {
       display: flex;
       align-items: center;
+
       li {
         margin-right: 20px;
       }
     }
+
     .change {
       margin-top: 20px;
       padding: 20px 16px;
       background-color: #E7F6F6;
       border-radius: 4px;
+
       .title {
         padding-left: 6px;
         color: #2f4f4f;
+
         span:nth-child(1) {
           margin-right: 6px;
         }
+
         .answer {
           margin: 20px 0px 20px 8px;
         }
+
         .el-textarea {
           width: 98% !important;
         }
       }
+
       .options {
         ul {
           display: flex;
           flex-direction: column;
         }
+
         ul li {
           display: flex;
           justify-content: center;
           align-items: center;
           width: 98%;
           margin: 10px 0px;
+
           span {
             margin-right: 20px;
           }
         }
       }
+
       .submit {
         display: flex;
         justify-content: center;
         align-items: center;
-      }        
+      }
     }
+
     .fill {
       .fillAnswer {
         display: flex;
         justify-content: center;
         align-items: center;
+
         span {
           margin-right: 6px;
         }
+
         .el-input {
           width: 91% !important;
         }
       }
+
       .analysis {
         margin-top: 20px;
         margin-left: 5px;
       }
     }
+
     .judge {
       .judgeAnswer {
         margin-left: 20px;
         margin-bottom: 20px;
       }
     }
+
     .w150 {
       width: 150px;
     }
+
     li:nth-child(2) {
       display: flex;
       align-items: center;

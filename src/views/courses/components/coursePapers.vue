@@ -21,7 +21,7 @@
           label="可见性"
           align="center"
           width="180"
-          prop="visible"
+          prop="papers.visible"
           v-if = "isAdmin"
       />
       <el-table-column
@@ -71,11 +71,12 @@ export default {
   },
   setup() {
     const columns = ref([
-      { label: "测试ID", prop: "id"},
-      { label: "测试名称", prop: "paperName" },
-      { label: "测试开始时间", prop: "paperStartTime" },
-      { label: "测试结束时间", prop: "paperEndTime" },
-      { label: "测试状态", prop: "status" },
+      { label: "测试ID", prop: "papers.id"},
+      { label: "测试名称", prop: "papers.paperName" },
+      { label: "测试开始时间", prop: "papers.paperStartTime" },
+      { label: "测试结束时间", prop: "papers.paperEndTime" },
+      { label: "测试状态", prop: "papers.status" },
+      { label: "试题数量", prop: "questionsNum"},
     ]);
 
     const currentPage = ref(1);
