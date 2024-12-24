@@ -49,6 +49,7 @@ const router = createRouter({
                     path: 'papers/:id',
                     name: 'papers',
                     component: () => import('./views/papers/index.vue'),
+                    meta: { requiresAuth: true }
                 },
                 {
                     path: 'announcements',

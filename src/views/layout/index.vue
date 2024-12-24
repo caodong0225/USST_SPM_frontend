@@ -33,12 +33,8 @@ const menuList = [
     path: '/settings',
     icon: 'setting',
   },
-  {
-    title: '我的题库',
-    path: '/questions',
-    icon: 'DocumentCopy',
-  },
 ]
+
 
 const form = reactive({
   oldPwd: '',
@@ -88,6 +84,14 @@ const getActiveAside = () => {
   console.log('当前路由的路径--------------', route.path)
   return route.path;
 };
+
+if(userInfoStore.userInfo.role > 0) {
+  menuList.push( {
+    title: '我的题库',
+    path: '/questions',
+    icon: 'DocumentCopy',
+  },)
+}
 
 // 初始化时获取营业状态
 const init = async () => {
@@ -229,7 +233,7 @@ const handleClose = () => {
 onMounted(() => {
   document.addEventListener('click', handleClose)
   // getStatus()
-  webSocket()
+  // webSocket()
 })
 
 onBeforeUnmount(() => {

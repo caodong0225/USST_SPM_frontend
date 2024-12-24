@@ -21,3 +21,10 @@ export const deleteQuestion = (questionId: number) => {
         method: 'delete',
     });
 }
+
+export const getPaperQuestionList = (paperId: string) => {
+    return request({
+        url: `/question/preview/paper/${paperId}`,
+        method: 'get',
+    });
+}
