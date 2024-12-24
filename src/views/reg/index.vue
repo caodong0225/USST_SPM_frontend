@@ -74,12 +74,6 @@ const registerFn = async () => {
     delete form.value.repassword // 删除确认密码字段
     // 1.调用注册接口，通过接口的return request，拿到promise对象
     const {data: res} = await registerAPI(form.value)
-    console.log(res)
-    // 2.注册失败，响应拦截器已经ElMessage提示用户，这里直接返回
-    if (res.code !== 200) {
-      console.log('注册失败！')
-      return false
-    }
     // 3.注册成功，提示用户
     ElMessage.success('注册成功!')
     // 4.路由跳转到登录页面
