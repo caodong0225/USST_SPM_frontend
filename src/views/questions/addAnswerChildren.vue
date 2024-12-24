@@ -1,64 +1,57 @@
 // 添加题库
 <template>
   <div class="add">
-    <el-tabs v-model="activeName">
+    <el-tabs v-model="activeName" class="question-tabs">
       <el-tab-pane name="first">
-        <el-button type="text" @click="returnBack">返回</el-button>
-        <span slot="label"><i class="el-icon-circle-plus"></i>添加试题</span>
+        <template #label>
+          <div class="tab-label">
+            <el-icon>
+              <Plus />
+            </el-icon>
+            <span>添加试题</span>
+          </div>
+        </template>
+        <div class="tab-header">
+          <el-button @click="returnBack">
+            <el-icon>
+              <Back />
+            </el-icon>返回
+          </el-button>
+        </div>
         <section class="append">
-          <ul>
+          <ul class="form-header">
             <li>
               <span>题目类型:</span>
               <el-select v-model="optionValue" placeholder="请选择题型" class="w150">
-                <el-option
-                    v-for="item in options"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value">
+                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
               </el-select>
             </li>
             <li v-if="optionValue == '选择题'">
               <span>难度等级:</span>
               <el-select v-model="postChange.level" placeholder="选择难度等级" class="w150">
-                <el-option
-                    v-for="item in levels"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value">
+                <el-option v-for="item in levels" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
               </el-select>
             </li>
             <li v-if="optionValue == '填空题'">
               <span>难度等级:</span>
               <el-select v-model="postFill.level" placeholder="选择难度等级" class="w150">
-                <el-option
-                    v-for="item in levels"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value">
+                <el-option v-for="item in levels" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
               </el-select>
             </li>
             <li v-if="optionValue == '判断题'">
               <span>难度等级:</span>
               <el-select v-model="postJudge.level" placeholder="选择难度等级" class="w150">
-                <el-option
-                    v-for="item in levels"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value">
+                <el-option v-for="item in levels" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
               </el-select>
             </li>
             <li v-if="optionValue == '选择题'">
               <span>正确选项:</span>
               <el-select v-model="postChange.rightAnswer" placeholder="选择正确答案" class="w150">
-                <el-option
-                    v-for="item in rights"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value">
+                <el-option v-for="item in rights" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
               </el-select>
             </li>
@@ -66,41 +59,56 @@
           <!-- 选择题部分 -->
           <div class="change" v-if="optionValue == '选择题'">
             <div class="title">
-              <el-tag>题目:</el-tag>
-              <span>在下面的输入框中输入题目,形如--DNS 服务器和DHCP服务器的作用是（）</span>
-              <el-input
-                  type="textarea"
-                  rows="4"
-                  v-model="postChange.question"
-                  placeholder="请输入题目内容"
-                  resize="none"
-                  class="answer">
+              <div class="section-header">
+                <el-tag type="primary" size="large">题目</el-tag>
+                <el-tooltip content="在下面的输入框中输入题目,形如--DNS 服务器和DHCP服务器的作用是（）" placement="right">
+                  <el-icon>
+                    <QuestionFilled />
+                  </el-icon>
+                </el-tooltip>
+              </div>
+              <el-input type="textarea" rows="4" v-model="postChange.question" placeholder="请输入题目内容" resize="none"
+                class="answer">
               </el-input>
+              <div class="example-questions">
+                <p class="example-title">示例题目：</p>
+                <ul>
+                  <li>在OSI参考模型中，（）层提供端到端的可靠数据传输服务。</li>
+                  <li>以下关于Java中重载(Overload)的说法，错误的是（）。</li>
+                  <li>在软件开发过程中，需求分析阶段的主要任务是（）。</li>
+                </ul>
+              </div>
             </div>
             <div class="options">
+              <div class="section-header">
+                <el-tag type="success" size="large">选项</el-tag>
+              </div>
               <ul>
                 <li v-for="(right, index) in rights" :key="index">
                   <el-tag type="success">{{ right.label }}</el-tag>
-                  <el-input
-                      :placeholder="'请输入选项' + right.label + '的内容'"
-                      v-model="postChange['answer' + right.value]"
-                      clearable="">
+                  <el-input :placeholder="'请输入选项' + right.label + '的内容'" v-model="postChange['answer' + right.value]"
+                    clearable="">
                   </el-input>
                 </li>
               </ul>
-              <el-button type="primary" @click="handleAdd">添加选项</el-button>
-              <el-button type="danger" @click="handleMinus">删除选项</el-button>
+              <div class="option-actions">
+                <el-button type="primary" @click="handleAdd">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>添加选项
+                </el-button>
+                <el-button type="danger" @click="handleMinus">
+                  <el-icon>
+                    <Minus />
+                  </el-icon>删除选项
+                </el-button>
+              </div>
             </div>
             <div class="title">
               <el-tag>解析:</el-tag>
               <span>在下面的输入框中输入题目解析</span>
-              <el-input
-                  type="textarea"
-                  rows="4"
-                  v-model="postChange.analysis"
-                  placeholder="请输入答案解析"
-                  resize="none"
-                  class="answer">
+              <el-input type="textarea" rows="4" v-model="postChange.analysis" placeholder="请输入答案解析" resize="none"
+                class="answer">
               </el-input>
             </div>
             <div class="submit">
@@ -110,16 +118,25 @@
           <!-- 填空题部分 -->
           <div class="change fill" v-if="optionValue == '填空题'">
             <div class="title">
-              <el-tag>题目:</el-tag>
-              <span>输入题目,形如--从计算机网络系统组成的角度看，计算机网络可以分为()和()。注意需要考生答题部分一定要用括号（英文半角）括起来。</span>
-              <el-input
-                  type="textarea"
-                  rows="4"
-                  v-model="postFill.question"
-                  placeholder="请输入题目内容"
-                  resize="none"
-                  class="answer">
+              <div class="section-header">
+                <el-tag type="primary" size="large">题目</el-tag>
+                <el-tooltip content="输入题目,形如--从计算机网络系统组成的角度看，计算机网络可以分为()和()。注意需要考生答题部分一定要用括号（英文半角）括起来。"
+                  placement="right">
+                  <el-icon>
+                    <QuestionFilled />
+                  </el-icon>
+                </el-tooltip>
+              </div>
+              <el-input type="textarea" rows="4" v-model="postFill.question" placeholder="请输入题目内容" resize="none"
+                class="answer">
               </el-input>
+              <div class="example-questions">
+                <p class="example-title">示例题目：</p>
+                <ul>
+                  <li>计算机网络按照规模可分为（）和（）。</li>
+                  <li>Java中的基本数据类型包括（）、（）、（）等。</li>
+                </ul>
+              </div>
             </div>
             <div class="fillAnswer">
               <el-tag>正确答案:</el-tag>
@@ -128,13 +145,8 @@
             <div class="title analysis">
               <el-tag type="success">解析:</el-tag>
               <span>下方输入框中输入答案解析</span>
-              <el-input
-                  type="textarea"
-                  rows="4"
-                  v-model="postFill.analysis"
-                  placeholder="请输入答案解析"
-                  resize="none"
-                  class="answer">
+              <el-input type="textarea" rows="4" v-model="postFill.analysis" placeholder="请输入答案解析" resize="none"
+                class="answer">
               </el-input>
             </div>
             <div class="submit">
@@ -144,16 +156,24 @@
           <!-- 判断题 -->
           <div class="change judge" v-if="optionValue === '判断题'">
             <div class="title">
-              <el-tag>题目:</el-tag>
-              <span>在下面的输入框中输入题目</span>
-              <el-input
-                  type="textarea"
-                  rows="4"
-                  v-model="postJudge.question"
-                  placeholder="请输入题目内容"
-                  resize="none"
-                  class="answer">
+              <div class="section-header">
+                <el-tag type="primary" size="large">题目</el-tag>
+                <el-tooltip content="在下面的输入框中输入题目" placement="right">
+                  <el-icon>
+                    <QuestionFilled />
+                  </el-icon>
+                </el-tooltip>
+              </div>
+              <el-input type="textarea" rows="4" v-model="postJudge.question" placeholder="请输入题目内容" resize="none"
+                class="answer">
               </el-input>
+              <div class="example-questions">
+                <p class="example-title">示例题目：</p>
+                <ul>
+                  <li>Java中的接口可以包含默认方法实现。（）</li>
+                  <li>HTTP协议是无状态的协议。（）</li>
+                </ul>
+              </div>
             </div>
             <div class="judgeAnswer">
               <el-radio v-model="postJudge.answer" label="T">正确</el-radio>
@@ -162,13 +182,8 @@
             <div class="title">
               <el-tag>解析:</el-tag>
               <span>在下面的输入框中输入题目解析</span>
-              <el-input
-                  type="textarea"
-                  rows="4"
-                  v-model="postJudge.analysis"
-                  placeholder="请输入答案解析"
-                  resize="none"
-                  class="answer">
+              <el-input type="textarea" rows="4" v-model="postJudge.analysis" placeholder="请输入答案解析" resize="none"
+                class="answer">
               </el-input>
             </div>
             <div class="submit">
@@ -184,11 +199,7 @@
             <li>
               <span>试题难度:</span>
               <el-select v-model="difficultyValue" placeholder="试题难度" class="w150">
-                <el-option
-                    v-for="item in difficulty"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value">
+                <el-option v-for="item in difficulty" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
               </el-select>
             </li>
@@ -215,9 +226,9 @@
 </template>
 
 <script>
-import {createQuestion} from "../../api/questions.ts";
-import {useRoute} from "vue-router";
-import {ref} from "vue";
+import { createQuestion } from "../../api/questions.ts";
+import { useRoute } from "vue-router";
+import { ref } from "vue";
 
 export default {
   name: 'AddAnswerChildren',
@@ -239,7 +250,7 @@ export default {
       options: [ //题库类型
         {
           value: '选择题',
-          label: '选择题'
+          label: '选择���'
         },
         {
           value: '填空题',
@@ -327,9 +338,9 @@ export default {
     //   console.log(tab, event);
     // },
     returnBack() {
-      if(this.paperId == null){
+      if (this.paperId == null) {
         this.$router.push(`/questions/list/${this.courseId}`)
-      }else{
+      } else {
         this.$router.push(`/questions/list/${this.courseId}?paperId=${this.paperId}`)
       }
     },
@@ -466,6 +477,32 @@ export default {
 <style lang="less" scoped>
 .add {
   margin: 0px 40px;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--el-box-shadow-light);
+
+  .question-tabs {
+    .tab-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+
+  .tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
 
   .box {
     padding: 0px 20px;
@@ -509,7 +546,7 @@ export default {
     .change {
       margin-top: 20px;
       padding: 20px 16px;
-      background-color: #E7F6F6;
+      background-color: var(--el-bg-color-page);
       border-radius: 4px;
 
       .title {
@@ -529,22 +566,40 @@ export default {
         }
       }
 
+      .example-questions {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: var(--el-fill-color-lighter);
+        border-radius: 4px;
+
+        .example-title {
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+          color: var(--el-text-color-secondary);
+        }
+
+        ul {
+          list-style: disc;
+          margin-left: 1.5rem;
+
+          li {
+            margin-bottom: 0.5rem;
+            color: var(--el-text-color-regular);
+          }
+        }
+      }
+
       .options {
         ul {
           display: flex;
           flex-direction: column;
+          gap: 1rem;
         }
 
-        ul li {
+        .option-actions {
           display: flex;
-          justify-content: center;
-          align-items: center;
-          width: 98%;
-          margin: 10px 0px;
-
-          span {
-            margin-right: 20px;
-          }
+          gap: 1rem;
+          margin-top: 1rem;
         }
       }
 
@@ -595,5 +650,3 @@ export default {
   }
 }
 </style>
-
-

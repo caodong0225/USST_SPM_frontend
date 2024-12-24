@@ -15,9 +15,30 @@ export const getUserExtraInfo = (id: number) => {
     });
 }
 
-export const getUserList = (current?: number , size?:number) => {
+export const getUserList = (current?: number, size?: number) => {
     return request({
         url: `/user/list?current=${current}&size=${size}`,
         method: 'get',
     });
+}
+
+// 更新用户信息
+export function updateUserInfo(data: any) {
+    return request({
+        url: '/user/update',
+        method: 'put',
+        data
+    })
+}
+
+// 上传头像
+export function uploadAvatar(data: FormData) {
+    return request({
+        url: '/user/avatar',
+        method: 'post',
+        data,
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    })
 }

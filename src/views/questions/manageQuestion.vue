@@ -1,65 +1,88 @@
 <!--考生答题界面-->
 <template>
-  <h3>题库管理</h3>
-  <div id="answer">
-    <!--顶部信息栏-->
-    <div class="flexarea">
-      <!--左边题目编号区-->
-      <transition name="slider-fade">
-        <div class="left" v-if="slider_flag">
-          <div class="l-top">
-            <el-button icon="plus" type="primary" @click="addQuestion">
-              添加题目
-            </el-button>
-            <el-button icon="minus" type="danger" @click="deleteQuestion" :disabled="examData.length === 0">
-              删除本题
-            </el-button>
+  <div class="question-manage">
+    <header class="page-header">
+      <h1>题库管理</h1>
+      <div class="header-actions">
+        <el-button type="primary" @click="addQuestion">
+          <el-icon>
+            <Plus />
+          </el-icon>添加题目
+        </el-button>
+        <el-button type="danger" @click="deleteQuestion" :disabled="examData.length === 0">
+          <el-icon>
+            <Delete />
+          </el-icon>删除本题
+        </el-button>
+      </div>
+    </header>
+
+    <div id="answer">
+      <div class="flexarea">
+        <!-- 左侧题目列表 -->
+        <transition name="slider-fade">
+          <div class="left" v-if="slider_flag">
+            <div class="l-bottom">
+              <!-- 选择题部分 -->
+              <div class="item">
+                <div class="item-header">
+                  <el-tag type="info">选择题</el-tag>
+                  <span class="count">共 {{ topic[1].length }} 题</span>
+                </div>
+                <ul>
+                  <li v-for="(list, index1) in topic[1]" :key="index1">
+                    <a href="javascript:;" @click="change(index1)" :class="{
+                      'border': index == index1 && currentType === 1,
+                      'bg': bg_flag && topic[1][index1].isClick == true,
+                      'marked': topic[1][index1].isMark === true
+                    }">
+                      {{ list.id }}
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- 填空题部分 -->
+              <div class="item">
+                <div class="item-header">
+                  <el-tag type="success">填空题</el-tag>
+                  <span class="count">共 {{ topic[2].length }} 题</span>
+                </div>
+                <ul>
+                  <li v-for="(list, index2) in topic[2]" :key="index2">
+                    <a href="javascript:;" @click="fill(index2)"
+                      :class="{ 'border': index == index2 && currentType == 2, 'bg': fillAnswer[index2][3] == true }"><span
+                        :class="{ 'mark': topic[2][index2].isMark == true }"></span>{{ list.id }}</a>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- 判断题部分 -->
+              <div class="item">
+                <div class="item-header">
+                  <el-tag type="warning">判断题</el-tag>
+                  <span class="count">共 {{ topic[3].length }} 题</span>
+                </div>
+                <ul>
+                  <li v-for="(list, index3) in topic[3]" :key="index3">
+                    <a href="javascript:;" @click="judge(index3)"
+                      :class="{ 'border': index == index3 && currentType == 3, 'bg': bg_flag && topic[3][index3].isClick == true }"><span
+                        :class="{ 'mark': topic[3][index3].isMark == true }"></span>{{ list.id }}</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
-          <div class="l-bottom">
-            <div class="item">
-              <p>选择题部分</p>
-              <ul>
-                <li v-for="(list, index1) in topic[1]" :key="index1">
-                  <a href="javascript:;"
-                     @click="change(index1)"
-                     :class="{'border': index == index1 && currentType === 1,'bg': bg_flag && topic[1][index1].isClick == true}">
-                    <span :class="{'mark': topic[1][index1].isMark === true}"></span>
-                    {{ list.id }}
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div class="item">
-              <p>填空题部分</p>
-              <ul>
-                <li v-for="(list, index2) in topic[2]" :key="index2">
-                  <a href="javascript:;" @click="fill(index2)"
-                     :class="{'border': index == index2 && currentType == 2,'bg': fillAnswer[index2][3] == true}"><span
-                      :class="{'mark': topic[2][index2].isMark == true}"></span>{{ list.id }}</a>
-                </li>
-              </ul>
-            </div>
-            <div class="item">
-              <p>判断题部分</p>
-              <ul>
-                <li v-for="(list, index3) in topic[3]" :key="index3">
-                  <a href="javascript:;" @click="judge(index3)"
-                     :class="{'border': index == index3 && currentType == 3,'bg': bg_flag && topic[3][index3].isClick == true}"><span
-                      :class="{'mark': topic[3][index3].isMark == true}"></span>{{ list.id }}</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </transition>
-      <!--右边选择答题区-->
-      <transition name="slider-fade">
+        </transition>
+
+        <!-- 右侧题目内容 -->
         <div class="right">
           <div class="title">
-            <p>{{ title }}</p>
-            <i class="iconfont icon-right auto-right"></i>
-            <span>共{{ examData.length }}题  <i class="iconfont icon-time"></i></span>
-            <span v-if="paperId != null">已选择{{selectedNum}}题</span>
+            <h2>{{ title }}</h2>
+            <div class="title-info">
+              <span>共 {{ examData.length }} 题</span>
+              <span v-if="paperId != null">已选择 {{ selectedNum }} 题</span>
+            </div>
           </div>
           <div class="content" v-if="examData.length > 0">
             <p class="topic"><span class="number">{{ number }}</span>{{ showQuestion.questionName }}</p>
@@ -73,7 +96,8 @@
                 <ul>
                   <li>
                     <el-tag type="success">正确答案：</el-tag>
-                    <span class="right">{{ showQuestion.answers }}</span></li>
+                    <span class="right">{{ showQuestion.answers }}</span>
+                  </li>
                   <li>
                     <el-tag>题目解析：</el-tag>
                   </li>
@@ -86,7 +110,8 @@
                 <ul>
                   <li>
                     <el-tag type="success">正确答案：</el-tag>
-                    <span class="right">{{ topic[2][index].answers }}</span></li>
+                    <span class="right">{{ topic[2][index].answers }}</span>
+                  </li>
                   <li>
                     <el-tag>题目解析：</el-tag>
                   </li>
@@ -103,7 +128,8 @@
                 <ul>
                   <li>
                     <el-tag type="success">正确答案：</el-tag>
-                    <span class="right">{{ topic[3][index]?.answers }}</span></li>
+                    <span class="right">{{ topic[3][index]?.answers }}</span>
+                  </li>
                   <li>
                     <el-tag>题目解析：</el-tag>
                   </li>
@@ -112,10 +138,10 @@
               </div>
             </div>
           </div>
-          <div class="operation" v-if="examData.length>0">
+          <div class="operation" v-if="examData.length > 0">
             <ul class="end">
               <li @click="previous()"><i class="iconfont icon-previous"></i><span>上一题</span></li>
-              <div v-if="paperId!=null">
+              <div v-if="paperId != null">
                 <li @click="mark()" v-if="!this.topic[this.currentType][this.index]['isMark']"><i
                     class="iconfont icon-mark-o"></i><span>选择题目</span></li>
                 <li @click="unmark()" v-else><i class="iconfont icon-mark-o"></i><span>取消选择</span></li>
@@ -124,16 +150,16 @@
             </ul>
           </div>
         </div>
-      </transition>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import {useRoute} from "vue-router";
-import {deleteQuestion, getQuestionList} from "../../api/questions.ts";
-import {ElMessage} from "element-plus";
-import {addPaperQuestion, deletePaperQuestion, getAddedQuestions} from "../../api/paper.ts";
+import { useRoute } from "vue-router";
+import { deleteQuestion, getQuestionList } from "../../api/questions.ts";
+import { ElMessage } from "element-plus";
+import { addPaperQuestion, deletePaperQuestion, getAddedQuestions } from "../../api/paper.ts";
 
 export default {
   name: "manageQuestion",
@@ -188,7 +214,7 @@ export default {
   },
   methods: {
     mark() { //标记功能
-      addPaperQuestion(this.paperId, {"questionId": this.topic[this.currentType][this.index].id}).then(res => {
+      addPaperQuestion(this.paperId, { "questionId": this.topic[this.currentType][this.index].id }).then(res => {
         if (res.code === 200) {
           ElMessage.success('添加成功')
           this.topic[this.currentType][this.index]["isMark"] = true //标记
@@ -232,7 +258,7 @@ export default {
     },
     addQuestion() {
       // 页面跳转
-      if(this.paperId != null) {
+      if (this.paperId != null) {
         this.$router.push(`/questions/${this.courseId}?paperId=${this.paperId}`)
       } else {
         this.$router.push(`/questions/${this.courseId}`)
@@ -278,7 +304,7 @@ export default {
           }
         }
       })
-      // this.$axios(`/api/exam/${examCode}`).then(res => {  //通过examCode请求试卷详细信息
+      // this.$axios(`/api/exam/${examCode}`).then(res => {  //通过examCode请求试卷详情信息
       //   this.examData = { ...res.data.data} //获取考试详情
       //   this.index = 0
       //   this.time = this.examData.totalScore //获取分钟数
@@ -408,7 +434,7 @@ export default {
 }
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
 .iconfont.icon-time {
   color: #2776df;
   margin: 0px 6px 0px 20px;
@@ -482,7 +508,8 @@ export default {
   transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
 }
 
-.slider-fade-enter, .slider-fade-leave-to {
+.slider-fade-enter,
+.slider-fade-leave-to {
   transform: translateX(-100px);
   opacity: 0;
 }
@@ -666,7 +693,10 @@ export default {
 .left {
   width: 260px;
   height: 100%;
-  margin: 10px 10px 0px 10px;
+  margin-right: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--el-box-shadow-light);
 }
 
 .left .l-top li:nth-child(2) a {
@@ -753,5 +783,67 @@ export default {
   font-size: 16px;
   width: 200px;
   text-align: left;
+}
+
+.question-manage {
+  padding: 2rem;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+    }
+  }
+}
+
+.item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--el-border-color-light);
+
+  .count {
+    color: var(--el-text-color-secondary);
+    font-size: 0.9rem;
+  }
+}
+
+.right {
+  flex: 1;
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--el-box-shadow-light);
+  padding: 2rem;
+
+  .title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+
+    .title-info {
+      display: flex;
+      gap: 1rem;
+      color: var(--el-text-color-secondary);
+    }
+  }
 }
 </style>

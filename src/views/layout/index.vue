@@ -1,10 +1,10 @@
 <script setup lang="ts" name="layout">
 import { RouterView, useRouter, useRoute } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { ElNotification } from 'element-plus'
-import {useUserInfoStore} from "../../store";
-import {logoutAPI} from "../../api/auth.ts";
+import { useUserInfoStore } from "../../store";
+import { logoutAPI } from "../../api/auth.ts";
 
 // ------ data ------
 const dialogFormVisible = ref(false)
@@ -16,25 +16,65 @@ const menuList = [
   {
     title: '首页',
     path: '/home',
-    icon: 'pieChart',
+    icon: 'HomeFilled',
+    badge: '',
   },
   {
-    title: '我的课程',
+    title: '课程管理',
     path: '/courses',
-    icon: 'memo',
+    icon: 'Reading',
+    children: [
+      { title: '全部课程', path: '/courses' },
+      { title: '我的课程', path: '/courses/my' },
+      { title: '创建课程', path: '/courses/create', role: 'teacher' }
+    ]
   },
   {
-    title: '公告', // 新增公告
-    path: '/announcements', // 新增路径
-    icon: 'notification', // 图标名称，根据 UI 框架的图标库选择
+    title: '考试管理',
+    path: '/exams',
+    icon: 'DocumentChecked',
+    children: [
+      { title: '考试列表', path: '/exams' },
+      { title: '考试记录', path: '/exams/records' },
+      { title: '创建考试', path: '/exams/create', role: 'teacher' }
+    ]
+  },
+  {
+    title: '题库管理',
+    path: '/questions',
+    icon: 'Collection',
+    children: [
+      { title: '题目列表', path: '/questions' },
+      { title: '添加题目', path: '/questions/add', role: 'teacher' },
+      { title: '题目分类', path: '/questions/categories' }
+    ]
+  },
+  {
+    title: '公告',
+    path: '/announcements',
+    icon: 'Bell',
+    badge: '3'
   },
   {
     title: '个人设置',
     path: '/settings',
-    icon: 'setting',
+    icon: 'Setting',
   },
 ]
 
+const visibleMenuList = computed(() => {
+  return menuList.map(menu => {
+    if (menu.children) {
+      return {
+        ...menu,
+        children: menu.children.filter(item =>
+          !item.role || item.role === userInfoStore.userInfo.role
+        )
+      }
+    }
+    return menu
+  })
+})
 
 const form = reactive({
   oldPwd: '',
@@ -84,14 +124,6 @@ const getActiveAside = () => {
   console.log('当前路由的路径--------------', route.path)
   return route.path;
 };
-
-if(userInfoStore.userInfo.role > 0) {
-  menuList.push( {
-    title: '我的题库',
-    path: '/questions',
-    icon: 'DocumentCopy',
-  },)
-}
 
 // 初始化时获取营业状态
 const init = async () => {
@@ -165,12 +197,12 @@ const quitFn = () => {
       type: 'warning',
     }
   )
-    .then(async() => {
+    .then(async () => {
       // 向后端发送退出登录请求
       await logoutAPI()
       // 登录失败，提示用户，这个提示已经在响应拦截器中统一处理了，这里直接return就行
       // 清除用户信息，包括token
-      userInfoStore.userInfo = {id: 0, nickname: '', role: 0, sessionId: ''}
+      userInfoStore.userInfo = { id: 0, nickname: '', role: 0, sessionId: '' }
       ElMessage({
         type: 'success',
         message: '退出成功',
@@ -220,7 +252,7 @@ const webSocket = () => {
       })
     }
     websocket.value.onclose = () => {
-      console.log('WebSocket已关闭')
+      console.log('WebSocket关闭')
     }
   }
 }
@@ -233,13 +265,42 @@ const handleClose = () => {
 onMounted(() => {
   document.addEventListener('click', handleClose)
   // getStatus()
-  // webSocket()
+  webSocket()
 })
 
 onBeforeUnmount(() => {
   if (websocket.value) {
     websocket.value.close()
   }
+})
+
+// 刷新页面
+const refreshPage = () => {
+  window.location.reload()
+}
+
+// 全屏切换
+const isFullscreen = ref(false)
+const toggleFullScreen = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen()
+    isFullscreen.value = true
+  } else {
+    document.exitFullscreen()
+    isFullscreen.value = false
+  }
+}
+
+// 面包屑导航
+const breadcrumbs = computed(() => {
+  const paths = route.path.split('/').filter(Boolean)
+  return paths.map((path, index) => {
+    const fullPath = '/' + paths.slice(0, index + 1).join('/')
+    return {
+      path: fullPath,
+      title: menuList.find(menu => menu.path === fullPath)?.title || path
+    }
+  })
 })
 </script>
 
@@ -266,56 +327,174 @@ onBeforeUnmount(() => {
     </el-dialog>
     <el-container>
       <el-header>
-        <img src="../../assets/image/spm.png" class="logo" />
-        <el-icon class="icon1" v-if="isCollapse">
-          <Expand @click.stop="isCollapse = !isCollapse" />
-        </el-icon>
-        <el-icon class="icon1" v-else>
-          <Fold @click.stop="isCollapse = !isCollapse" />
-        </el-icon>
-        <el-dropdown style="float: right">
-          <el-button type="primary">
-            {{ userInfoStore.userInfo ? userInfoStore.userInfo.nickname : '未登录' }}
-            <el-icon class="arrow-down-icon"><arrow-down /></el-icon>
+        <div class="header-left">
+          <img src="../../assets/image/spm.png" class="logo" />
+          <el-button class="toggle-sidebar" text @click="isCollapse = !isCollapse">
+            <el-icon :size="20">
+              <Fold v-if="!isCollapse" />
+              <Expand v-else />
+            </el-icon>
           </el-button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="dialogFormVisible = true">修改密码</el-dropdown-item>
-              <el-dropdown-item @click="quitFn">退出登录</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-        <!-- 添加一个图标按钮 -->
-        <el-button
-            class="icon-btn"
-            icon="Bell"
-            circle
-            @click="handleNotificationClick"
-            style="float: right; margin-top: 14px;">
-        </el-button>
+        </div>
+
+        <div class="header-center">
+          <el-breadcrumb separator="/">
+            <el-breadcrumb-item :to="{ path: '/' }">
+              <el-icon>
+                <HomeFilled />
+              </el-icon>首页
+            </el-breadcrumb-item>
+            <el-breadcrumb-item v-for="item in breadcrumbs" :key="item.path" :to="{ path: item.path }">
+              {{ item.title }}
+            </el-breadcrumb-item>
+          </el-breadcrumb>
+
+          <div class="quick-actions">
+            <div class="action-group">
+              <el-tooltip content="首页" placement="bottom">
+                <el-button text @click="$router.push('/home')">
+                  <el-icon>
+                    <HomeFilled />
+                  </el-icon>
+                </el-button>
+              </el-tooltip>
+            </div>
+
+            <el-divider direction="vertical" />
+
+            <div class="action-group">
+              <el-tooltip content="帮助文档" placement="bottom">
+                <el-button text @click="showHelp">
+                  <el-icon>
+                    <QuestionFilled />
+                  </el-icon>
+                </el-button>
+              </el-tooltip>
+              <el-tooltip content="刷新页面" placement="bottom">
+                <el-button text @click="refreshPage">
+                  <el-icon>
+                    <Refresh />
+                  </el-icon>
+                </el-button>
+              </el-tooltip>
+              <el-tooltip content="全屏" placement="bottom">
+                <el-button text @click="toggleFullScreen">
+                  <el-icon>
+                    <FullScreen />
+                  </el-icon>
+                </el-button>
+              </el-tooltip>
+            </div>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <el-popover placement="bottom" :width="300" trigger="click">
+            <template #reference>
+              <el-badge :value="3" class="notice-badge">
+                <el-button text>
+                  <el-icon>
+                    <Bell />
+                  </el-icon>
+                </el-button>
+              </el-badge>
+            </template>
+            <div class="notification-panel">
+              <div class="panel-header">
+                <span>系统通知</span>
+                <el-button text size="small">全部已读</el-button>
+              </div>
+              <div class="notification-list">
+                <div v-for="i in 3" :key="i" class="notification-item">
+                  <el-icon color="#409EFF">
+                    <Message />
+                  </el-icon>
+                  <div class="content">
+                    <div class="title">系统通知</div>
+                    <div class="desc">您有一个新的考试待参加</div>
+                    <div class="time">10分钟前</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </el-popover>
+
+          <el-dropdown>
+            <div class="user-info">
+              <el-avatar :size="32" :src="userInfoStore.userInfo?.avatar || '/person.png'" />
+              <span class="username">{{ userInfoStore.userInfo?.nickname || '未登录' }}</span>
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="$router.push('/settings')">
+                  <el-icon>
+                    <User />
+                  </el-icon>个人中心
+                </el-dropdown-item>
+                <el-dropdown-item @click="dialogFormVisible = true">
+                  <el-icon>
+                    <Key />
+                  </el-icon>修改密码
+                </el-dropdown-item>
+                <el-dropdown-item divided @click="quitFn">
+                  <el-icon>
+                    <SwitchButton />
+                  </el-icon>退出登录
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
       </el-header>
+
       <el-container class="box1">
-        <!-- 左侧导航菜单区域 -->
-        <el-menu :width="isCollapse ? '640px' : '200px'" :default-active="getActiveAside()" :collapse="isCollapse"
-          background-color="#22aaee" text-color="#fff" unique-opened router>
-          <!-- 加了router模式，就会在激活导航时以 :index 作为path进行路径跳转（nb!不用自己写路由了!） -->
-          <!-- 根据不同情况选择menu-item/submenu进行遍历，所以外层套template遍历，里面组件做判断看是否该次遍历到自己 -->
-          <template v-for="item in menuList" :key="item.path">
-            <el-menu-item :index="item.path">
+        <el-menu :width="isCollapse ? '64px' : '240px'" :default-active="route.path" :collapse="isCollapse"
+          background-color="#fff" text-color="#303133" active-text-color="#409EFF" :collapse-transition="false"
+          unique-opened router>
+          <div class="menu-header">
+            <span v-if="!isCollapse">功能导航</span>
+            <el-icon v-else>
+              <Menu />
+            </el-icon>
+          </div>
+          <template v-for="item in visibleMenuList" :key="item.path">
+            <el-sub-menu v-if="item.children?.length" :index="item.path">
+              <template #title>
+                <el-icon>
+                  <component :is="item.icon" />
+                </el-icon>
+                <span>{{ item.title }}</span>
+              </template>
+              <div class="submenu-content">
+                <el-menu-item v-for="child in item.children" :key="child.path" :index="child.path">
+                  <template #title>
+                    <span>{{ child.title }}</span>
+                    <el-tag v-if="child.role === 'teacher'" size="small" type="success" effect="plain" class="role-tag">
+                      教师
+                    </el-tag>
+                  </template>
+                </el-menu-item>
+              </div>
+            </el-sub-menu>
+            <el-menu-item v-else :index="item.path">
               <el-icon>
                 <component :is="item.icon" />
               </el-icon>
-              <span>{{ item.title }}</span>
+              <template #title>
+                <span>{{ item.title }}</span>
+                <el-badge v-if="item.badge" :value="item.badge" class="menu-badge" />
+              </template>
             </el-menu-item>
           </template>
         </el-menu>
-
-        <el-container class="mycontainer">
+        <div class="mycontainer">
           <el-main>
-            <router-view></router-view>
+            <RouterView></RouterView>
           </el-main>
-          <el-footer>© 2024.11.28 上海理工大学项目管理与过程改进大作业</el-footer>
-        </el-container>
+          <el-footer>
+            Copyright © 2024 USST SPM
+          </el-footer>
+        </div>
       </el-container>
     </el-container>
   </div>
@@ -323,66 +502,123 @@ onBeforeUnmount(() => {
 
 <style lang="less" scoped>
 .common-layout {
-  height: 100%;
-  background-color: #eee;
+  height: 100vh;
+  background-color: var(--el-bg-color);
 }
 
 .el-header {
   background-color: #00aaff;
+  height: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
   color: #ffffff;
-  line-height: 60px;
 
-  .logo {
-    display: inline-block;
-    margin: 10px 20px;
-    width: 180px;
-    height: 40px;
-  }
-
-  .icon1 {
-    position: absolute;
-    top: 18px;
-    margin: 5px 10px 0 0;
-  }
-
-  .status {
-    display: inline-block;
+  .header-left {
+    display: flex;
     align-items: center;
-    vertical-align: top;
-    line-height: 30px;
-    margin: 15px 50px;
-    padding: 0 10px;
-    border-radius: 5px;
-    background-color: #eebb00;
-    color: #fff;
+    gap: 16px;
+
+    .logo {
+      display: inline-block;
+      margin: 10px 20px;
+      width: 180px;
+      height: 40px;
+    }
+
+    .toggle-sidebar {
+      color: #ffffff;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+    }
   }
-}
 
-.rightAudio {
-  float: right;
-  // margin: 14px 20px;
-}
+  .header-center {
+    display: flex;
+    align-items: center;
+    gap: 24px;
 
-.status-change {
-  float: right;
-  margin: 14px 20px;
-  background-color: rgba(255, 255, 255, 0.3);
-  border: none;
-  color: #fff;
-}
+    .el-breadcrumb {
+      color: #fff;
+      margin-right: 16px;
 
-.user {
-  float: right;
-  margin-right: 20px;
+      :deep(.el-breadcrumb__item) {
+        .el-breadcrumb__inner {
+          color: rgba(255, 255, 255, 0.8);
+          font-weight: normal;
+
+          &:hover {
+            color: #fff;
+          }
+
+          .el-icon {
+            margin-right: 4px;
+            font-size: 16px;
+          }
+        }
+
+        &:last-child .el-breadcrumb__inner {
+          color: #fff;
+          font-weight: 600;
+        }
+      }
+    }
+
+    .quick-actions {
+      display: flex;
+      align-items: center;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 0 8px;
+
+      .action-group {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .el-button {
+        color: #ffffff;
+        height: 32px;
+        width: 32px;
+        padding: 0;
+        border-radius: 16px;
+
+        .el-icon {
+          font-size: 16px;
+        }
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+      }
+
+      .el-divider {
+        height: 20px;
+        margin: 0 8px;
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
 }
 
 .el-dropdown .el-button {
   float: right;
-  width: 80px;
+  width: auto;
+  min-width: 100px;
   margin: 14px 20px;
-  background-color: #eebb00;
-  border-color: #eebb00;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff;
+  transition: all 0.3s;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
 
   .arrow-down-icon {
     margin-left: 5px;
@@ -391,139 +627,304 @@ onBeforeUnmount(() => {
 
 .box1 {
   display: flex;
-  height: 92vh;
+  height: calc(100vh - 60px);
 }
 
 .mycontainer {
-  display: flex;
-  flex: 6;
-  flex-direction: column;
+  flex: 1;
+  background-color: var(--el-bg-color-page);
+  padding: 20px;
+  overflow-y: auto;
 }
 
 .el-main {
   flex: 1;
-  background-color: #e9f5ff;
-  color: #333;
-  /* text-align: center; */
-  /* line-height: 80px; */
-}
-
-a {
-  display: block;
-  height: 4rem;
-  color: #334455;
-  font-size: 20px;
-  font-weight: bold;
-  text-decoration: none;
-}
-
-a:hover {
-  background-color: #445566;
-  color: #eee;
-}
-
-.el-footer {
-  background-color: #eee;
-  font-size: 12px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-</style>
-
-
-
-<style lang="less">
-.el-dialog {
-  border-radius: 2%;
-}
-
-.el-dialog__header {
-  height: 60px;
-  line-height: 60px;
-  padding: 0 30px;
-  font-weight: bold;
-}
-
-.el-dialog__body {
-  padding: 10px 30px 30px;
-
-  .el-radio,
-  .el-radio__input {
-    white-space: normal; // 设置其自动换行，别撑不下还挤在一起...
-  }
-
-  .el-radio__label {
-    padding-top: 15px;
-    color: #445588;
-    font-weight: 700;
-
-    span {
-      display: block;
-      line-height: 20px;
-      padding: 12px 0 20px 0;
-      color: #666;
-      font-weight: normal;
-    }
-  }
-
-  .el-radio-group {
-    &>.is-checked {
-      border: 1px solid #00aaff;
-    }
-  }
-
-  .el-radio {
-    width: 410px; // 本来想设置100%的，但是设置成固定值能去除el-radio-last-child的样式影响
-    height: 100px;
-    background: #fbfbfa;
-    border: 1px solid #e5e4e4;
-    border-radius: 4px;
-    padding: 14px 22px;
-    margin-top: 20px;
-  }
-
-  // .el-radio__input.is-checked+.el-radio__label {
-  //   span {}
-  // }
-}
-
-.el-badge__content.is-fixed {
-  top: 24px;
-  right: 2px;
-  width: 18px;
-  height: 18px;
-  font-size: 10px;
-  line-height: 16px;
-  font-size: 10px;
-  border-radius: 50%;
-  padding: 0;
-}
-
-.badgeW {
-  .el-badge__content.is-fixed {
-    width: 30px;
-    border-radius: 20px;
-  }
+  padding: 20px;
+  background-color: #f5f7fa;
+  overflow-y: auto;
 }
 
 .el-menu {
-  padding: 30px 0 0 0;
+  width: 240px;
+  height: 100%;
   background-color: #445566;
+  border-right: none;
+  transition: width 0.3s;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  &.el-menu--collapse {
+    width: 64px;
+
+    :deep(.el-menu-item),
+    :deep(.el-sub-menu__title) {
+      padding: 0 20px !important;
+      justify-content: center;
+      text-align: center;
+
+      .el-icon {
+        margin: 0 auto !important;
+      }
+
+      span {
+        display: none;
+      }
+
+      .menu-badge {
+        display: none;
+      }
+    }
+  }
+
+  // 修复弹出菜单的样式
+  :deep(.el-menu--popup-container) {
+    .el-popper__content {
+      background-color: #00aaff !important;
+      border: none;
+      padding: 0;
+    }
+
+    .el-menu {
+      background-color: #00aaff !important;
+      border: none;
+
+      .el-menu-item {
+        height: 40px;
+        line-height: 40px;
+        color: #fff;
+        padding: 0 20px !important;
+        margin: 4px 0;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        &.is-active {
+          background-color: #22ccff;
+          color: #fff;
+        }
+
+        span {
+          color: #fff;
+        }
+      }
+    }
+
+    // 修复子菜单的样式
+    .el-menu--popup {
+      background-color: #00aaff !important;
+
+      .el-menu-item {
+        background-color: #00aaff;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        &.is-active {
+          background-color: #22ccff;
+        }
+      }
+    }
+
+    .el-popper__arrow::before {
+      background-color: #00aaff !important;
+      border-color: #00aaff !important;
+    }
+  }
+
+  :deep(.el-icon) {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .el-menu-item {
+    height: 50px;
+    line-height: 50px;
+    padding: 0 20px;
+    margin: 4px 0;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    min-width: unset;
+
+    :deep(.el-icon) {
+      margin-right: 12px;
+    }
+
+    &.is-active {
+      background-color: #22ccff;
+      color: #ffffff;
+      font-weight: 500;
+    }
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  :deep(.el-sub-menu) {
+    .el-sub-menu__title {
+      height: 50px;
+      line-height: 50px;
+      padding: 0 16px !important;
+      margin: 4px 0;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+
+      .el-icon {
+        margin-right: 12px;
+      }
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      &.is-active {
+        background-color: #22ccff;
+      }
+    }
+
+    .el-menu {
+      background-color: rgba(0, 0, 0, 0.2);
+
+      .el-menu-item {
+        padding-left: 48px !important;
+        min-width: unset;
+
+        &.is-active {
+          background-color: #22ccff;
+        }
+      }
+    }
+  }
+
+  .menu-badge {
+    position: absolute;
+    right: 20px;
+  }
 }
 
-.el-menu-item {
-  margin: 10px;
-  padding-right: 30px;
-  border-radius: 10px;
+.el-footer {
+  padding: 15px 0;
+  text-align: center;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+  background-color: #fff;
+  border-top: 1px solid var(--el-border-color-light);
 }
 
-.el-menu-item.is-active {
-  background-color: #22ccff;
-  color: #fff;
+// 对话框样式优化
+.el-dialog {
+  border-radius: 8px;
+
+  .el-dialog__header {
+    margin: 0;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .el-dialog__body {
+    padding: 20px;
+  }
+
+  .dialog-footer {
+    padding-top: 10px;
+    text-align: right;
+  }
 }
 
-.el-menu--collapse {
-  width: 85px;
+// 通知面板样式
+.notification-panel {
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid var(--el-border-color-light);
+
+    span {
+      font-weight: bold;
+    }
+  }
+
+  .notification-list {
+    max-height: 300px;
+    overflow-y: auto;
+
+    .notification-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+      border-bottom: 1px solid var(--el-border-color-lighter);
+      cursor: pointer;
+
+      &:hover {
+        background-color: var(--el-fill-color-light);
+      }
+
+      .content {
+        flex: 1;
+
+        .title {
+          font-weight: bold;
+          margin-bottom: 4px;
+        }
+
+        .desc {
+          color: var(--el-text-color-regular);
+          font-size: 12px;
+          margin-bottom: 4px;
+        }
+
+        .time {
+          color: var(--el-text-color-secondary);
+          font-size: 12px;
+        }
+      }
+    }
+  }
+
+  .panel-footer {
+    padding: 12px;
+    text-align: center;
+    border-top: 1px solid var(--el-border-color-light);
+  }
+}
+
+// 添加过渡动画
+.el-menu-enter-active,
+.el-menu-leave-active {
+  transition: all 0.3s;
+}
+
+.el-menu-enter-from,
+.el-menu-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .username {
+    color: #fff;
+    font-size: 14px;
+  }
 }
 </style>
