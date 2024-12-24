@@ -27,10 +27,11 @@
       <el-table-column
           label="操作"
           align="center"
-          width="180"
+          width="280"
           v-if = "isAdmin"
       >
         <template #default="scope">
+          <el-button size="mini" type="primary" @click="handlePreview(scope.row)">提交记录</el-button>
           <el-button size="mini" @click="handleEdit(scope.row)" v-if = "isAdmin">编辑</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.row)" v-if = "isAdmin">删除</el-button>
         </template>
@@ -45,6 +46,17 @@
         :page-size="pageSize"
         @current-change="handlePageChange"
     />
+    <el-dialog title="提交记录" v-model="dialogVisible" width="60%">
+      <el-table :data="submitRecords" border>
+        <el-table-column prop="id" label="记录ID" />
+        <el-table-column prop="result.correctNum" label="正确数" />
+        <el-table-column prop="result.wrongNum" label="错误数" />
+        <el-table-column prop="createdAt" label="提交时间" />
+      </el-table>
+      <template #footer>
+        <el-button @click="dialogVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </el-card>
   <CreatePaper :course-id="courseId" v-else/>
 </template>
@@ -55,6 +67,7 @@ import {useUserInfoStore} from "../../../store";
 import CreatePaper from "./addPaper.vue";
 import {deletePaper} from "../../../api/paper.ts";
 import {ElMessage} from "element-plus";
+import {getSubmitList} from "../../../api/submit.ts";
 
 export default {
   name: "TableWithPagination",
@@ -74,6 +87,8 @@ export default {
       this.$router.push(`/questions/list/${this.courseId}?paperId=${row.papers.id}`)
     },
     handleEntry(row) {
+      if(dialogVisible.value)
+        return
       this.$router.push(`/papers/${row.papers.id}`)
     }
   },
@@ -92,6 +107,8 @@ export default {
     const userInfoStore = useUserInfoStore()
     const isAdmin = ref(false);
     const addPaper = ref(false);
+    const dialogVisible = ref(false);
+    const submitRecords = ref([]);
     if (userInfoStore.userInfo.role > 0) {
       isAdmin.value = true;
     }
@@ -99,12 +116,30 @@ export default {
       currentPage.value = page;
     };
 
+    const handlePreview = (row) => {
+      getSubmitList(row.papers.id).then((res) => {
+        if (res.code === 200) {
+          submitRecords.value = [];
+          for (let record of res.data) {
+            submitRecords.value.push({
+              id: record.id,
+              createdAt: record.createdAt,
+              result: JSON.parse(record.result),
+            });
+          }
+          dialogVisible.value = true;
+        } else {
+          ElMessage.error("获取提交记录失败");
+        }
+      });
+    };
+
     const handleDelete = (row) => {
-      deletePaper(row.id).then(res => {
+      deletePaper(row.papers.id).then(res => {
         if(res.code === 200){
           ElMessage.success('删除成功');
           // 刷新当前组件的数据信息
-          this.tableData = this.tableData.filter(item => item.id !== row.id)
+          this.tableData = this.tableData.filter(item => item.papers.id !== row.papers.id)
         }else{
           ElMessage.error('删除失败')
         }
@@ -119,6 +154,9 @@ export default {
       addPaper,
       handlePageChange,
       handleDelete,
+      handlePreview,
+      dialogVisible,
+      submitRecords
     };
   },
 };

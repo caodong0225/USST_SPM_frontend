@@ -105,6 +105,7 @@
 <script>
 import {useRoute} from "vue-router";
 import {getPaperQuestionList} from "../../api/questions.ts";
+import {submit} from "../../api/submit.ts";
 
 export default {
   name: "manageQuestion",
@@ -204,9 +205,34 @@ export default {
       }
     },
     submitPaper(){
-      console.log(this.topic1Answer)
-      console.log(this.fillAnswer)
-      console.log(this.judgeAnswer)
+      const dataPut = []
+      for(let i = 0; i < this.topic[1].length; i++){
+        dataPut.push({
+          questionId: this.topic[1][i].id,
+          answer: this.topic1Answer[i].substring(6)
+        })
+      }
+      for(let i = 0; i < this.topic[2].length; i++){
+        dataPut.push({
+          questionId: this.topic[2][i].id,
+          answer: this.fillAnswer[i]
+        })
+      }
+      for(let i = 0; i < this.topic[3].length; i++){
+        dataPut.push({
+          questionId: this.topic[3][i].id,
+          answer: this.judgeAnswer[i] === 1 ? 'true' : 'false'
+        })
+      }
+      submit(this.paperId, dataPut).then(res => {
+        if(res.code === 200){
+          this.$message({
+            message: '提交成功',
+            type: 'success'
+          })
+          this.$router.push(`/home`)
+        }
+      })
     },
     fillBG() { //填空题已答题目 如果已答该题目,设置第四个元素为true为标识符
       this.topic[2][this.index]["isClick"] = this.fillAnswer[this.index] != null && this.fillAnswer[this.index] !== "";
