@@ -1,5 +1,33 @@
-# Vue 3 + TypeScript + Vite
+# 说明
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+这是上海理工大学项目管理与过程改进课程的课程作业，要求实现一个在线的课程管理系统。
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## 演示效果：
+
+![1](./docs/1.png)
+
+![2](./docs/2.jpeg)
+
+![3](./docs/3.jpeg)
+
+![4](./docs/4.jpeg)
+
+后端地址：https://github.com/caodong0225/USST_SPM_backend
+
+## 如何运行？
+
+首先使用：
+
+```bash
+npm run install
+```
+
+完成相关包的安装
+
+然后使用：
+
+```bash
+npm run dev
+```
+
+完成启动
