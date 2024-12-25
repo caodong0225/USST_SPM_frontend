@@ -24,11 +24,17 @@ export const getCourseDetail = (courseId: number) => {
     });
 }
 
-export const addCourse = (course: any) => {
+export const addCourse = (data: any) => {
     return request({
         url: '/course/add',
         method: 'post',
-        data: course
+        data: {
+            courseName: data.courseName,
+            courseDesc: data.courseDesc,
+            coursePic: data.coursePic,
+            startTime: data.startTime,
+            endTime: data.endTime
+        }
     });
 }
 
@@ -61,7 +67,7 @@ export const deleteCourseParticipate = (courseId: number, userId: number) => {
     });
 }
 
-export const getMyCreatedCourses = (current: number , page:number) => {
+export const getMyCreatedCourses = (current: number, page: number) => {
     return request({
         url: `/course/myCreated/list?pageNum=${current}&pageSize=${page}`,
         method: 'get'

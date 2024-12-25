@@ -250,7 +250,7 @@ export default {
       options: [ //题库类型
         {
           value: '选择题',
-          label: '选择���'
+          label: '选择题'
         },
         {
           value: '填空题',

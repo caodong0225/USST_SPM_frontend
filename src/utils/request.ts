@@ -1,6 +1,7 @@
 import axios from 'axios';
 import router from '../router';
 import { ElMessage } from 'element-plus';
+import { useUserInfoStore } from '../store';
 
 // 定义公共的前缀
 const baseURL = '/api';
@@ -9,10 +10,25 @@ const instance = axios.create({ baseURL });
 // 请求拦截器
 instance.interceptors.request.use(
     (config) => {
-        // 在这里可以为所有请求添加统一的请求头等操作
+        // 从 store 中获取 token
+        const userStore = useUserInfoStore();
+        const token = userStore.userInfo.sessionId;
+
+        console.log('请求配置:', {
+            url: config.url,
+            method: config.method,
+            data: config.data,
+            headers: config.headers
+        });
+
+        // 如果有token，添加到请求头
+        if (token) {
+            config.headers['Authorization'] = token;
+        }
         return config;
     },
     (error) => {
+        console.error('请求错误:', error);
         return Promise.reject(error);
     }
 );
@@ -31,6 +47,10 @@ instance.interceptors.response.use(
     },
     (error) => {
         console.dir(error);
+        if (error.response?.status === 403) {
+            ElMessage.error('权限不足，请确认是否已登录或具有相应权限');
+            router.push('/login');
+        }
         if (error.response?.status === 401) {
             ElMessage.error('用户身份已过期~');
             router.push('/login');

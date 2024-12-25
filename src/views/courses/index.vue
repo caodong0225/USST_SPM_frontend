@@ -92,7 +92,7 @@ const mockCourses = [
   {
     courseId: 1,
     courseName: '软件工程导论',
-    courseDesc: '本课程介绍软件工程的基本概念、原理和方法，包括软件过程��需求分析、系统设计、编码实现、测试验证等内容。',
+    courseDesc: '本课程介绍软件工程的基本概念、原理和方法，包括软件过程���需求分析、系统设计、编码实现、测试验证等内容。',
     startTime: '2024-03-01',
     endTime: '2024-07-01',
     status: 'active',
@@ -183,7 +183,7 @@ const sortBy = ref('latest')
 
 // 分页
 const currentPage = ref(1)
-const pageSize = ref(12)
+const pageSize = ref(8)
 const totalNum = computed(() => filteredCourses.value.length)
 
 // 方法
@@ -261,7 +261,10 @@ const filteredCourses = computed(() => {
     })
   }
 
-  return result
+  // 分页处理
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return result.slice(start, end)
 })
 
 // 添加课程统计数据
@@ -295,6 +298,58 @@ const courseStats = computed(() => [
     trend: -2
   }
 ])
+
+// 添加更多示例课程数据
+mockCourses.push(
+  {
+    courseId: 6,
+    courseName: '操作系统原理',
+    courseDesc: '学习操作系统的基本概念、进程管理、内存管理、文件系统等核心内容。',
+    startTime: '2024-03-10',
+    endTime: '2024-07-10',
+    status: 'active',
+    progress: 40,
+    studentCount: 88,
+    coursePic: 'https://source.unsplash.com/800x400/?computer,os',
+    teacher: {
+      name: '赵教授',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teacher6'
+    },
+    tags: ['必修', '实验']
+  },
+  {
+    courseId: 7,
+    courseName: '计算机组成原理',
+    courseDesc: '深入学习计算机硬件系统的组成、结构和工作原理。',
+    startTime: '2024-03-05',
+    endTime: '2024-07-05',
+    status: 'active',
+    progress: 50,
+    studentCount: 92,
+    coursePic: 'https://source.unsplash.com/800x400/?computer,hardware',
+    teacher: {
+      name: '钱教授',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teacher7'
+    },
+    tags: ['必修', '考试']
+  },
+  {
+    courseId: 8,
+    courseName: '数据结构与算法',
+    courseDesc: '学习基本数据结构和算法设计与分析方法。',
+    startTime: '2024-03-15',
+    endTime: '2024-07-15',
+    status: 'active',
+    progress: 35,
+    studentCount: 105,
+    coursePic: 'https://source.unsplash.com/800x400/?algorithm,data',
+    teacher: {
+      name: '孙教授',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teacher8'
+    },
+    tags: ['必修', '大作业']
+  }
+)
 </script>
 
 <style scoped>

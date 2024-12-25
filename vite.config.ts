@@ -17,9 +17,8 @@ export default defineConfig({
     proxy: {
       // 配置代理规则
       '/api': {
-        target: 'http://localhost:8080', // 后端服务器地址
+        target: 'http://10.100.164.38', // 修改为正确的后端地址
         changeOrigin: true, // 修改请求头中的 Host 为目标地址
-        rewrite: (path) => path.replace(/^\/api/, '') // 去掉请求路径中的 /api 前缀
       }
     }
   }

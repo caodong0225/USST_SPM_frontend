@@ -217,45 +217,7 @@ const quitFn = () => {
     })
 }
 
-// refs
-const websocket = ref<WebSocket | null>(null)
 const shopShow = ref(false)
-
-const webSocket = () => {
-  const clientId = Math.random().toString(36).slice(2)
-  const socketUrl = 'ws://localhost:8081/ws/' + clientId
-  console.log('socketUrl', socketUrl)
-
-  if (typeof WebSocket == 'undefined') {
-    console.log('当前浏览器无法接收实时报警信息，请使用谷歌浏览器！')
-    ElNotification({
-      title: '提示',
-      message: '当前浏览器无法接收实时报警信息，请使用谷歌浏览器！',
-      type: 'warning',
-      duration: 0,
-    })
-  } else {
-    websocket.value = new WebSocket(socketUrl)
-    websocket.value.onopen = () => {
-      console.log('浏览器WebSocket已打开')
-    }
-    websocket.value.onmessage = (msg) => {
-      // 解析服务器通过WebSocket发送的消息
-      const jsonMsg = JSON.parse(msg.data)
-    }
-    websocket.value.onerror = () => {
-      ElNotification({
-        title: '错误',
-        message: '服务器错误，无法接收实时报警信息',
-        type: 'error',
-        duration: 0,
-      })
-    }
-    websocket.value.onclose = () => {
-      console.log('WebSocket关闭')
-    }
-  }
-}
 
 const handleClose = () => {
   shopShow.value = false
@@ -265,13 +227,12 @@ const handleClose = () => {
 onMounted(() => {
   document.addEventListener('click', handleClose)
   // getStatus()
-  webSocket()
+  // 暂时关闭 WebSocket 连接
+  // webSocket()
 })
 
 onBeforeUnmount(() => {
-  if (websocket.value) {
-    websocket.value.close()
-  }
+  document.removeEventListener('click', handleClose)
 })
 
 // 刷新页面
@@ -302,6 +263,10 @@ const breadcrumbs = computed(() => {
     }
   })
 })
+
+const openHelp = () => {
+  window?.open('http://localhost:8080/doc.html', '_blank')
+}
 </script>
 
 <template>
@@ -364,7 +329,7 @@ const breadcrumbs = computed(() => {
 
             <div class="action-group">
               <el-tooltip content="帮助文档" placement="bottom">
-                <el-button text @click="showHelp">
+                <el-button text @click="openHelp">
                   <el-icon>
                     <QuestionFilled />
                   </el-icon>
