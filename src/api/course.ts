@@ -28,12 +28,9 @@ export const addCourse = (data: any) => {
     return request({
         url: '/course/add',
         method: 'post',
-        data: {
-            courseName: data.courseName,
-            courseDesc: data.courseDesc,
-            coursePic: data.coursePic,
-            startTime: data.startTime,
-            endTime: data.endTime
+        data,
+        headers: {
+            'Content-Type': 'application/json'
         }
     });
 }
@@ -71,5 +68,20 @@ export const getMyCreatedCourses = (current: number, page: number) => {
     return request({
         url: `/course/myCreated/list?pageNum=${current}&pageSize=${page}`,
         method: 'get'
+    });
+}
+
+export const uploadCourseCover = (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', 'course');
+
+    return request({
+        url: '/course/upload',
+        method: 'post',
+        data: formData,
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
     });
 }

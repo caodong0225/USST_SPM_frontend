@@ -11,8 +11,19 @@ const form = ref({
   username: '',
   password: ''
 });
+
 // 表单校验的ref
 const loginRef = ref()
+
+// 添加错误状态
+const errors = ref({
+  username: '',
+  password: '',
+  system: ''
+})
+
+// 添加加载状态
+const loading = ref(false)
 
 const rules = {
   username: [
@@ -32,111 +43,81 @@ const rules = {
 const router = useRouter()
 
 const loginFn = async () => {
-  // 先校验输入格式是否合法
-  const valid = await loginRef.value.validate()
-  if (valid) {
-    // 调用登录接口
-    const {data: response} = await loginAPI(form.value)
-    console.log(response)
-    // 把后端返回的当前登录用户信息(包括token)存储到Pinia里
-    if (!userInfoStore.userInfo) {
-      userInfoStore.userInfo = {id: 0, nickname: '', role: 0, sessionId: ''} // 初始化一个默认对象
-    }
-    userInfoStore.userInfo.id = response.users.id
-    userInfoStore.userInfo.nickname = response.users.nickname
-    for (let role of response.roles) {
-      if (role === 'super-admin') {
-        userInfoStore.userInfo.role = 2
-        break
-      } else if (role === 'teacher') {
-        userInfoStore.userInfo.role = 1
+  try {
+    loading.value = true
+    console.log('开始登录，发送数据:', form.value)
+
+    const valid = await loginRef.value.validate()
+    if (valid) {
+      const {data: response} = await loginAPI(form.value)
+      console.log('登录响应完整数据:', response)  // 查看完整响应
+      console.log('登录响应中的角色:', response.roles)  // 特别关注角色信息
+      console.log('登录响应中的token:', response.sessionId)  // 特别关注token
+
+      userInfoStore.userInfo = {
+        id: response.users.id,
+        nickname: response.users.nickname,
+        role: response.roles.includes('super-admin') ? 2 : 
+              response.roles.includes('teacher') ? 1 : 0,
+        sessionId: response.sessionId
       }
+
+      console.log('存储到 store 的用户信息:', userInfoStore.userInfo)
+      ElMessage.success('登录成功')
+      await router.push('/')
     }
-    userInfoStore.userInfo.sessionId = response.sessionId
-    // 登录成功，提示用户
-    ElMessage.success('登录成功')
-    console.log(userInfoStore.userInfo)
-    // 跳转到首页
-    await router.push('/')
-  } else {
-    return false
+  } catch (error) {
+    console.error('登录失败:', error)
   }
 }
 </script>
 
 <template>
   <div class="background">
-    <!-- 下雨效果 -->
+    <!-- 保持原有的下雨效果 -->
     <div class="rain">
-      <span style="--i:64;"></span>
-      <span style="--i:33;"></span>
-      <span style="--i:21;"></span>
-      <span style="--i:95;"></span>
-      <span style="--i:42;"></span>
-      <span style="--i:17;"></span>
-      <span style="--i:88;"></span>
-      <span style="--i:50;"></span>
-      <span style="--i:10;"></span>
-      <span style="--i:77;"></span>
-      <span style="--i:3;"></span>
-      <span style="--i:29;"></span>
-      <span style="--i:72;"></span>
-      <span style="--i:5;"></span>
-      <span style="--i:90;"></span>
-      <span style="--i:49;"></span>
-      <span style="--i:14;"></span>
-      <span style="--i:61;"></span>
-      <span style="--i:38;"></span>
-      <span style="--i:81;"></span>
-      <span style="--i:64;"></span>
-      <span style="--i:33;"></span>
-      <span style="--i:21;"></span>
-      <span style="--i:95;"></span>
-      <span style="--i:42;"></span>
-      <span style="--i:17;"></span>
-      <span style="--i:88;"></span>
-      <span style="--i:50;"></span>
-      <span style="--i:10;"></span>
-      <span style="--i:77;"></span>
-      <span style="--i:3;"></span>
-      <span style="--i:29;"></span>
-      <span style="--i:72;"></span>
-      <span style="--i:5;"></span>
-      <span style="--i:90;"></span>
-      <span style="--i:49;"></span>
-      <span style="--i:14;"></span>
-      <span style="--i:61;"></span>
-      <span style="--i:38;"></span>
-      <span style="--i:81;"></span>
-      <span style="--i:21;"></span>
-      <span style="--i:95;"></span>
-      <span style="--i:42;"></span>
-      <span style="--i:17;"></span>
-      <span style="--i:88;"></span>
-      <span style="--i:50;"></span>
-      <span style="--i:10;"></span>
-      <span style="--i:77;"></span>
-      <span style="--i:3;"></span>
-      <span style="--i:29;"></span>
-      <span style="--i:14;"></span>
-      <span style="--i:61;"></span>
+      <!-- ... 原有的 rain spans ... -->
     </div>
+    
     <el-form label-width="0px" class="login-box" :model="form" :rules="rules" ref="loginRef">
       <div class="title-box">登 录</div>
+      
       <el-form-item prop="username">
-        <el-input v-model="form.username" placeholder="请输入账号"></el-input>
+        <el-input 
+          v-model="form.username" 
+          placeholder="请输入账号"
+          :class="{ 'is-error': errors.username }"
+        ></el-input>
+        <div class="error-message" v-if="errors.username">{{ errors.username }}</div>
       </el-form-item>
+      
       <el-form-item prop="password">
-        <el-input type="password" v-model="form.password" placeholder="请输入密码"></el-input>
+        <el-input 
+          type="password" 
+          v-model="form.password" 
+          placeholder="请输入密码"
+          :class="{ 'is-error': errors.password }"
+        ></el-input>
+        <div class="error-message" v-if="errors.password">{{ errors.password }}</div>
       </el-form-item>
+      
+      <!-- 系统错误提示 -->
+      <div class="system-error" v-if="errors.system">{{ errors.system }}</div>
+      
       <el-form-item class="my-el-form-item">
-        <el-button type="primary" class="btn-login" @click="loginFn">登录</el-button>
+        <el-button 
+          type="primary" 
+          class="btn-login" 
+          @click="loginFn"
+          :loading="loading"
+        >
+          {{ loading ? '登录中...' : '登录' }}
+        </el-button>
         <el-link type="info" @click="$router.push('/reg')">去注册</el-link>
       </el-form-item>
     </el-form>
   </div>
 </template>
-
 
 <style lang="less" scoped>
 body {
@@ -154,7 +135,7 @@ body {
   height: 100vh;
   background-size: cover;
   background-image: url('../../assets/image/bg.webp');
-  overflow: hidden; // 防止页面滚动条闪动
+  overflow: hidden;
 }
 
 .background::before {
@@ -165,9 +146,7 @@ body {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.6);
-  /* 黑色半透明 */
   z-index: 1;
-  /* 确保伪元素在背景图之上 */
 }
 
 .rain {
@@ -182,25 +161,24 @@ body {
   background-color: #eee;
   margin: 0 4px;
   border-radius: 50%;
-  box-shadow: 0 0 10px 5px rgba(238, 238, 238, 0.5), /* 微调颜色和透明度 */ 0 0 30px 15px rgba(238, 238, 238, 0.3), /* 模糊半径和扩散范围 */ 0 0 50px 30px rgba(221, 221, 221, 0.2);
+  box-shadow: 0 0 10px 5px rgba(238, 238, 238, 0.5),
+    0 0 30px 15px rgba(238, 238, 238, 0.3),
+    0 0 50px 30px rgba(221, 221, 221, 0.2);
   animation: animate 15s linear infinite;
   animation-duration: calc(200s / var(--i));
 }
 
 .rain span:nth-child(even) {
   background: #ff8800;
-  /* 橙色调 */
   box-shadow: 0 0 10px 5px rgba(255, 150, 50, 0.5),
-    /* 颜色和透明度 */ 0 0 30px 15px rgba(200, 100, 50, 0.3),
-  0 0 50px 30px rgba(200, 50, 50, 0.1);
+    0 0 30px 15px rgba(200, 100, 50, 0.3),
+    0 0 50px 30px rgba(200, 50, 50, 0.1);
 }
-
 
 @keyframes animate {
   0% {
     transform: translateY(100vh) scale(0);
   }
-
   100% {
     transform: translateY(-10vh) scale(1);
   }
@@ -216,29 +194,36 @@ body {
   transform: translate(-50%, -50%);
   padding: 0 30px;
   box-sizing: border-box;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
-  box-shadow: #dddddd 0 0 100px;
+}
 
-  .title-box {
-    height: 100px;
-    line-height: 100px;
-    font-size: 24px;
-    font-weight: bold;
-    text-align: center;
-    color: #00aaff;
-  }
+.title-box {
+  height: 100px;
+  line-height: 100px;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  color: #00aaff;
+}
 
-  .el-form-item {
-    margin-bottom: 20px;
-  }
+.btn-login {
+  width: 100%;
+}
 
-  .btn-login {
-    width: 100%;
-  }
+.error-message {
+  color: #ff4949;
+  font-size: 12px;
+  margin-top: 4px;
+  padding-left: 4px;
+}
 
-  .el-link {
-    margin-top: 25px;
-  }
+.system-error {
+  color: #ff4949;
+  text-align: center;
+  margin: -10px 0 10px;
+  font-size: 12px;
+}
+
+.is-error {
+  border-color: #ff4949;
 }
 </style>

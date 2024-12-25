@@ -15,7 +15,7 @@
           <el-icon>
             <RefreshRight />
           </el-icon>重置
-        </el-button>
+          </el-button>
       </div>
     </header>
 
@@ -50,10 +50,10 @@
                 <div class="stat-item">
                   <span class="stat-value">{{ userInfo.homeworkCount || 0 }}</span>
                   <span class="stat-label">作业</span>
-                </div>
-              </div>
-            </div>
-          </div>
+      </div>
+    </div>
+        </div>
+        </div>
         </el-card>
       </div>
 
@@ -229,7 +229,7 @@ import type { FormInstance, FormRules } from 'element-plus'
 
 const userStore = useUserInfoStore()
 const userInfo = userStore.userInfo
-const avatarBase64 = ref<string | null>(null)
+    const avatarBase64 = ref<string | null>(null)
 const fileInput = ref<HTMLInputElement>()
 const basicForm = ref<FormInstance>()
 
@@ -375,7 +375,7 @@ const fetchUserExtraInfo = async () => {
 }
 
 // 触发文件选择
-const triggerFileInput = () => {
+    const triggerFileInput = () => {
   fileInput.value?.click()
 }
 
@@ -384,22 +384,22 @@ const handleImageUpload = async (event: Event) => {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
 
-  if (file) {
-    const reader = new FileReader()
+      if (file) {
+        const reader = new FileReader()
     reader.onload = async (e) => {
-      if (e.target) {
-        const pic = e.target.result as string
-        try {
+          if (e.target) {
+            const pic = e.target.result as string
+            try {
           await updateUserExtraInfo(userStore.userInfo.id, 'pic', {
             value: pic
           })
-          avatarBase64.value = pic
-          ElMessage.success('头像上传成功')
-        } catch (error) {
-          ElMessage.error('头像上传失败，请重试')
+              avatarBase64.value = pic
+              ElMessage.success('头像上传成功')
+            } catch (error) {
+              ElMessage.error('头像上传失败，请重试')
+            }
+          }
         }
-      }
-    }
     reader.readAsDataURL(file)
   }
 }
@@ -647,7 +647,7 @@ const resetSettings = () => {
   }
 
   .profile-header {
-    flex-direction: column;
+  flex-direction: column;
     text-align: center;
   }
 
