@@ -1,30 +1,67 @@
-import request from '../utils/request';
+import request from '@/utils/request';
 
-export const createQuestion = (data: any) => {
+// 创建试题
+export const createQuestion = (data: {
+    courseId: number;
+    questionType: string;
+    question: string;
+    questionLevel: string;
+    options: string;
+    explanation: string;
+    answers: string;
+}) => {
     return request({
-        url: `/question/create`,
+        url: '/question/create',
         method: 'post',
         data
     });
-}
+};
 
-export const getQuestionList = (courseId: number)=> {
+// 更新试题
+export const updateQuestion = (data: {
+    id: number;
+    questionType: string;
+    question: string;
+    questionLevel: string;
+    options: string;
+    explanation: string;
+    answers: string;
+}) => {
     return request({
-        url: `/question/preview/${courseId}/list`,
-        method: 'get',
+        url: '/question/update',
+        method: 'put',
+        data
     });
-}
+};
 
+// 获取试题列表
+export const getQuestionList = () => {
+    return request({
+        url: '/question/questionList',
+        method: 'get'
+    });
+};
+
+// 获取试题详情
+export const getQuestionDetail = (id: number) => {
+    return request({
+        url: `/question/detail/${id}`,
+        method: 'get'
+    });
+};
+
+// 删除试题
 export const deleteQuestion = (questionId: number) => {
     return request({
         url: `/question/delete/${questionId}`,
-        method: 'delete',
+        method: 'delete'
     });
-}
+};
 
+// 获取试卷试题列表
 export const getPaperQuestionList = (paperId: string) => {
     return request({
         url: `/question/preview/paper/${paperId}`,
-        method: 'get',
+        method: 'get'
     });
-}
+};

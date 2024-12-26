@@ -24,7 +24,7 @@
           v-for="course in courses"
           :key="course.id"
           class="course-card"
-          @click="$router.push(`/courses/${course.id}`)"
+          @click="$router.push(`/course/detail/${course.id}`)"
         >
           <div class="course-cover">
             <el-image
@@ -37,14 +37,13 @@
                 </div>
               </template>
             </el-image>
-            <div class="course-tags">
-              <el-tag size="small" effect="plain" type="info">
-                {{ course.type || '通识课程' }}
-              </el-tag>
-            </div>
+            
+            <!-- 课程状态 -->
             <div class="course-status" :class="course.status">
               {{ getStatusText(course.status) }}
             </div>
+
+            <!-- 课程进度 -->
             <div class="course-progress">
               <div class="progress-info">
                 <span class="progress-text">课程进度</span>
@@ -57,33 +56,61 @@
               />
             </div>
           </div>
+
           <div class="course-info">
+            <!-- 课程标题和标签 -->
             <div class="course-header">
               <h3 class="course-title">{{ course.courseName }}</h3>
-              <el-tag 
-                size="small" 
-                :type="course.difficulty || 'info'"
-              >
-                {{ getDifficultyText(course.difficulty) }}
-              </el-tag>
+              <div class="course-tags">
+                <el-tag 
+                  v-for="tag in course.tags" 
+                  :key="tag"
+                  size="small"
+                  :type="getTagType(tag)"
+                >
+                  {{ tag }}
+                </el-tag>
+              </div>
             </div>
+
+            <!-- 课程描述 -->
             <p class="course-desc">{{ course.courseDesc }}</p>
+
+            <!-- 课程时间和统计信息 -->
             <div class="course-meta">
               <div class="meta-left">
                 <span class="time">
                   <el-icon><Calendar /></el-icon>
                   {{ formatDate(course.startTime, 'YYYY-MM-DD HH:mm') }}
                 </span>
-                <span class="duration" v-if="course.duration">
+                <span class="duration">
                   <el-icon><Timer /></el-icon>
-                  {{ course.duration || '4周' }}
+                  {{ getDuration(course.startTime, course.endTime) }}
                 </span>
               </div>
               <div class="meta-right">
-                <span class="students">
+                <span class="students" v-if="course.maxStudents">
                   <el-icon><User /></el-icon>
-                  {{ course.studentCount || 0 }}人
+                  {{ course.maxStudents }}人
                 </span>
+                <el-tag 
+                  size="small" 
+                  :type="getDifficultyType(course.difficulty)"
+                >
+                  {{ getDifficultyText(course.difficulty) }}
+                </el-tag>
+              </div>
+            </div>
+
+            <!-- 课程资源统计 -->
+            <div class="resource-stats" v-if="course.resources?.length || course.videos?.length">
+              <div class="stat-item">
+                <el-icon><Document /></el-icon>
+                {{ course.resources?.length || 0 }} 个资源
+              </div>
+              <div class="stat-item">
+                <el-icon><VideoCamera /></el-icon>
+                {{ course.videos?.length || 0 }} 个视频
               </div>
             </div>
           </div>
@@ -109,7 +136,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Plus, Picture, Calendar, User, Timer } from '@element-plus/icons-vue'
+import { Plus, Picture, Calendar, Timer, Document, VideoCamera, User } from '@element-plus/icons-vue'
 import { getMyCreatedCourses } from '@/api/course'
 import { formatDate } from '@/utils/date'
 import PageLayout from '@/components/layout/PageLayout.vue'
@@ -125,7 +152,23 @@ const fetchCourses = async () => {
   loading.value = true
   try {
     const res = await getMyCreatedCourses(currentPage.value, pageSize.value)
-    courses.value = res.data.records
+    // 为每个课程添加额外的展示字段
+    courses.value = res.data.records.map(course => ({
+      ...course,
+      // 添加额外的展示字段
+      tags: ['必修课程', '考试课程'], // 示例标签
+      difficulty: 2, // 默认"进阶"难度
+      maxStudents: 100, // 默认最大学生数
+      courseType: 'online', // 默认在线课程
+      resources: [], // 资源列表
+      videos: [], // 视频列表
+      studentLevel: 'all', // 默认年级要求
+      enableScoring: true, // 默认启用评分
+      scoreItems: [ // 默认评分项
+        { name: '平时成绩', percentage: 30 },
+        { name: '期末考试', percentage: 70 }
+      ]
+    }))
     total.value = res.data.total
   } catch (error) {
     ElMessage.error('获取课程列表失败')
@@ -142,27 +185,6 @@ const getStatusText = (status: string) => {
     'ended': '已结束'
   }
   return statusMap[status] || status
-}
-
-// 分页处理
-const handleSizeChange = (val: number) => {
-  pageSize.value = val
-  fetchCourses()
-}
-
-const handleCurrentChange = (val: number) => {
-  currentPage.value = val
-  fetchCourses()
-}
-
-// 获取难度文本
-const getDifficultyText = (difficulty: string) => {
-  const difficultyMap: Record<string, string> = {
-    'easy': '入门',
-    'medium': '进阶',
-    'hard': '高级',
-  }
-  return difficultyMap[difficulty] || '入门'
 }
 
 // 计算课程进度
@@ -191,6 +213,49 @@ const getProgressText = (course: any) => {
   if (progress === 0) return '未开始'
   if (progress === 100) return '已结束'
   return `${progress}%`
+}
+
+// 计算课程时长
+const getDuration = (startTime: string, endTime: string) => {
+  const start = new Date(startTime)
+  const end = new Date(endTime)
+  const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+  return `${days}天`
+}
+
+// 分页处理
+const handleSizeChange = (val: number) => {
+  pageSize.value = val
+  fetchCourses()
+}
+
+const handleCurrentChange = (val: number) => {
+  currentPage.value = val
+  fetchCourses()
+}
+
+// 获取标签类型
+const getTagType = (tag: string) => {
+  const tagTypes: Record<string, string> = {
+    '必修': 'danger',
+    '选修': 'warning',
+    '实验': 'success',
+    '考试': 'info'
+  }
+  return tagTypes[tag] || ''
+}
+
+// 获取难度类型和文本
+const getDifficultyType = (difficulty: number) => {
+  if (difficulty === 3) return 'danger'
+  if (difficulty === 2) return 'warning'
+  return 'info'
+}
+
+const getDifficultyText = (difficulty: number) => {
+  if (difficulty === 3) return '高级'
+  if (difficulty === 2) return '进阶'
+  return '入门'
 }
 
 onMounted(() => {
@@ -311,10 +376,9 @@ onMounted(() => {
 }
 
 .course-tags {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 1;
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
 }
 
 .course-progress {
@@ -364,5 +428,27 @@ onMounted(() => {
 
 :deep(.el-progress-bar__inner) {
   transition: all 0.3s;
+}
+
+.resource-stats {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--el-text-color-secondary);
+}
+
+.meta-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 </style> 

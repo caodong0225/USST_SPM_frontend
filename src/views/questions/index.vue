@@ -1,149 +1,171 @@
 <template>
   <div class="questions-page">
-    <header class="page-header">
-      <div class="header-left">
-        <h1>题库管理</h1>
-        <el-tag type="info">共 {{ totalQuestions }} 道题目</el-tag>
-      </div>
-      <div class="header-actions">
-        <el-button type="primary" @click="$router.push(`/questions/add/${courseId}`)">
-          <el-icon>
-            <Plus />
-          </el-icon>添加题目
+    <!-- 加载状态 -->
+    <el-card v-if="loading" class="loading-card">
+      <el-skeleton :rows="3" animated />
+    </el-card>
+
+    <!-- 错误状态 -->
+    <el-empty 
+      v-else-if="error" 
+      :description="error"
+    >
+      <template #extra>
+        <el-button type="primary" @click="fetchQuestions">
+          重试
         </el-button>
-      </div>
-    </header>
+      </template>
+    </el-empty>
 
-    <!-- 统计卡片 -->
-    <div class="stats-cards">
-      <el-card v-for="stat in questionStats" :key="stat.title" class="stat-card">
-        <template #header>
-          <div class="stat-header">
-            <el-icon :class="stat.iconClass">
-              <component :is="stat.icon" />
-            </el-icon>
-            <span>{{ stat.title }}</span>
-          </div>
-        </template>
-        <div class="stat-value">{{ stat.value }}</div>
-        <div class="stat-info">
-          <small>较上月{{ stat.trend > 0 ? '增加' : '减少' }} {{ Math.abs(stat.trend) }}%</small>
-          <el-icon :class="stat.trend > 0 ? 'trend-up' : 'trend-down'">
-            <component :is="stat.trend > 0 ? 'ArrowUp' : 'ArrowDown'" />
-          </el-icon>
+    <!-- 正常显示内容 -->
+    <template v-else>
+      <header class="page-header">
+        <div class="header-left">
+          <h1>题库管理</h1>
+          <el-tag type="info">共 {{ totalQuestions }} 道题目</el-tag>
         </div>
-      </el-card>
-    </div>
+        <div class="header-actions">
+          <el-button type="primary" @click="$router.push('/questions/create')">
+            <el-icon>
+              <Plus />
+            </el-icon>添加题目
+          </el-button>
+        </div>
+      </header>
 
-    <!-- 筛选工具栏 -->
-    <div class="filter-toolbar">
-      <div class="toolbar-section">
-        <div class="search-box">
-          <el-input v-model="searchQuery" placeholder="搜索题目..." clearable>
-            <template #prefix>
-              <el-icon>
-                <Search />
+      <!-- 统计卡片 -->
+      <div class="stats-cards">
+        <el-card v-for="stat in questionStats" :key="stat.title" class="stat-card">
+          <template #header>
+            <div class="stat-header">
+              <el-icon :class="stat.iconClass">
+                <component :is="stat.icon" />
               </el-icon>
-            </template>
-          </el-input>
-        </div>
-        <div class="filters">
-          <el-select v-model="typeFilter" placeholder="题目类型" clearable>
-            <el-option label="全部类型" value="" />
-            <el-option label="选择题" value="choice" />
-            <el-option label="填空题" value="fill" />
-            <el-option label="判断题" value="judge" />
-          </el-select>
-          <el-select v-model="difficultyFilter" placeholder="难度等级" clearable>
-            <el-option label="全部难度" value="" />
-            <el-option label="简单" value="easy" />
-            <el-option label="中等" value="medium" />
-            <el-option label="困难" value="hard" />
-          </el-select>
-          <el-select v-model="sortBy" placeholder="排序方式">
-            <el-option label="最新添加" value="latest" />
-            <el-option label="使用次数" value="usage" />
-            <el-option label="难度等级" value="difficulty" />
-          </el-select>
-        </div>
+              <span>{{ stat.title }}</span>
+            </div>
+          </template>
+          <div class="stat-value">{{ stat.value }}</div>
+          <div class="stat-info">
+            <small>较上月{{ stat.trend > 0 ? '增加' : '减少' }} {{ Math.abs(stat.trend) }}%</small>
+            <el-icon :class="stat.trend > 0 ? 'trend-up' : 'trend-down'">
+              <component :is="stat.trend > 0 ? 'ArrowUp' : 'ArrowDown'" />
+            </el-icon>
+          </div>
+        </el-card>
       </div>
-      <div class="toolbar-section">
-        <el-radio-group v-model="viewMode" size="small">
-          <el-radio-button label="card">卡片视图</el-radio-button>
-          <el-radio-button label="table">表格视图</el-radio-button>
-        </el-radio-group>
-      </div>
-    </div>
 
-    <!-- 题目列表 -->
-    <div class="questions-list">
-      <el-empty v-if="!filteredQuestions.length" description="暂无题目" />
-      <el-card v-for="question in filteredQuestions" :key="question.id" class="question-card">
-        <div class="question-header">
-          <div class="question-type">
-            <el-tag :type="getQuestionTypeTag(question.type)">
-              {{ getQuestionTypeLabel(question.type) }}
-            </el-tag>
-            <el-tag :type="getDifficultyTag(question.difficulty)" class="difficulty-tag">
-              {{ question.difficulty }}
-            </el-tag>
+      <!-- 筛选工具栏 -->
+      <div class="filter-toolbar">
+        <div class="toolbar-section">
+          <div class="search-box">
+            <el-input v-model="searchQuery" placeholder="搜索题目..." clearable>
+              <template #prefix>
+                <el-icon>
+                  <Search />
+                </el-icon>
+              </template>
+            </el-input>
           </div>
-          <div class="question-actions">
-            <el-button-group>
-              <el-button type="primary" link @click="editQuestion(question)">
-                <el-icon>
-                  <Edit />
-                </el-icon>
-              </el-button>
-              <el-button type="danger" link @click="deleteQuestion(question)">
-                <el-icon>
-                  <Delete />
-                </el-icon>
-              </el-button>
-            </el-button-group>
+          <div class="filters">
+            <el-select v-model="typeFilter" placeholder="题目类型" clearable>
+              <el-option label="全部类型" value="" />
+              <el-option label="选择题" value="choice" />
+              <el-option label="填空题" value="fill" />
+              <el-option label="判断题" value="judge" />
+            </el-select>
+            <el-select v-model="difficultyFilter" placeholder="难度等级" clearable>
+              <el-option label="全部难度" value="" />
+              <el-option label="简单" value="easy" />
+              <el-option label="中等" value="medium" />
+              <el-option label="困难" value="hard" />
+            </el-select>
+            <el-select v-model="sortBy" placeholder="排序方式">
+              <el-option label="最新添加" value="latest" />
+              <el-option label="使用次数" value="usage" />
+              <el-option label="难度等级" value="difficulty" />
+            </el-select>
           </div>
         </div>
-        <div class="question-content">
-          <h3>{{ question.content }}</h3>
-          <div class="question-options" v-if="question.type === 'choice'">
-            <div v-for="(option, key) in question.options" :key="key" class="option">
-              {{ key }}: {{ option }}
+        <div class="toolbar-section">
+          <el-radio-group v-model="viewMode" size="small">
+            <el-radio-button label="card">卡片视图</el-radio-button>
+            <el-radio-button label="table">表格视图</el-radio-button>
+          </el-radio-group>
+        </div>
+      </div>
+
+      <!-- 题目列表 -->
+      <div class="questions-list">
+        <el-empty v-if="!filteredQuestions.length" description="暂无题目" />
+        <el-card v-for="question in filteredQuestions" :key="question.id" class="question-card">
+          <div class="question-header">
+            <div class="question-type">
+              <el-tag :type="getQuestionTypeTag(question.type)">
+                {{ getQuestionTypeLabel(question.type) }}
+              </el-tag>
+              <el-tag :type="getDifficultyTag(question.difficulty)" class="difficulty-tag">
+                {{ question.difficulty }}
+              </el-tag>
+            </div>
+            <div class="question-actions">
+              <el-button-group>
+                <el-button type="primary" link @click="editQuestion(question)">
+                  <el-icon>
+                    <Edit />
+                  </el-icon>
+                </el-button>
+                <el-button type="danger" link @click="deleteQuestion(question)">
+                  <el-icon>
+                    <Delete />
+                  </el-icon>
+          </el-button>
+              </el-button-group>
             </div>
           </div>
-        </div>
-        <div class="question-footer">
-          <div class="question-info">
-            <span>使用次数: {{ question.usageCount }}</span>
-            <span>添加时间: {{ formatDate(question.createdAt) }}</span>
+          <div class="question-content">
+            <h3>{{ question.content }}</h3>
+            <div class="question-options" v-if="question.type === 'choice'">
+              <div v-for="(option, key) in question.options" :key="key" class="option">
+                {{ key }}: {{ option }}
+              </div>
+            </div>
           </div>
-          <div class="question-answer">
-            <el-tag type="success">正确答案: {{ question.answer }}</el-tag>
+          <div class="question-footer">
+            <div class="question-info">
+              <span>使用次数: {{ question.usageCount }}</span>
+              <span>添加时间: {{ formatDate(question.createdAt) }}</span>
+            </div>
+            <div class="question-answer">
+              <el-tag type="success">正确答案: {{ question.answer }}</el-tag>
+            </div>
           </div>
-        </div>
-      </el-card>
-    </div>
+        </el-card>
+      </div>
 
-    <!-- 分页控制 -->
-    <div class="pagination-controls">
-      <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="totalQuestions"
-        :page-sizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next, jumper" @size-change="handleSizeChange"
-        @current-change="handlePageChange" />
-    </div>
+      <!-- 分页控制 -->
+      <div class="pagination-controls">
+        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="totalQuestions"
+          :page-sizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next, jumper" @size-change="handleSizeChange"
+          @current-change="handlePageChange" />
+      </div>
+        </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import dayjs from 'dayjs'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { getQuestionList } from '@/api/questions'
+import type { QuestionItem } from '@/types/question'
 
 // 示例数据
 const mockQuestions = [
   {
     id: '1',
     type: 'choice',
-    content: '在OSI参考模型中，（）层提供端到端的可靠数据传输服务。',
+    content: '在OSI参考模型中，（）层提供端到端���可靠数据传输服务。',
     options: {
       A: '物理层',
       B: '数据链路层',
@@ -225,8 +247,9 @@ const mockQuestions = [
 
 // 状态管理
 const route = useRoute()
-const courseId = route.params.id
-const questions = ref(mockQuestions)
+const loading = ref(false)
+const error = ref('')
+const questions = ref<QuestionItem[]>([])
 const searchQuery = ref('')
 const typeFilter = ref('')
 const difficultyFilter = ref('')
@@ -346,7 +369,7 @@ const handleSizeChange = (size: number) => {
   currentPage.value = 1
 }
 
-const handlePageChange = (page: number) => {
+    const handlePageChange = (page: number) => {
   currentPage.value = page
 }
 
@@ -356,7 +379,7 @@ const editQuestion = (question: any) => {
 
 const deleteQuestion = (question: any) => {
   ElMessageBox.confirm(
-    '确定要删除这道题目吗？',
+    '��定要删除这道题目吗？',
     '警告',
     {
       confirmButtonText: '确定',
@@ -368,6 +391,40 @@ const deleteQuestion = (question: any) => {
     ElMessage.success('删除成功')
   })
 }
+
+// 获取题目列表
+const fetchQuestions = async () => {
+  loading.value = true
+  try {
+    console.log('正在获取题目列表')
+    const res = await getQuestionList()
+    console.log('API响应:', res)
+
+    if (res.code === 200) {
+      questions.value = res.data
+      console.log('获取到的题目:', questions.value)
+    } else {
+      ElMessage.error(res.message || '获取题目列表失败')
+    }
+  } catch (error: any) {
+    console.error('获取题目列表详细错误:', {
+      message: error.message,
+      response: error.response,
+      status: error?.response?.status,
+      data: error?.response?.data
+    })
+    
+    // 临时使用 mock 数据
+    questions.value = mockQuestions
+    ElMessage.warning('使用模拟数据进行展示')
+  } finally {
+    loading.value = false
+  }
+}
+
+    onMounted(() => {
+  fetchQuestions()
+})
 </script>
 
 <style scoped>

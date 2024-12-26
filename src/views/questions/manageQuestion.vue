@@ -51,7 +51,7 @@
                 <ul>
                   <li v-for="(list, index2) in topic[2]" :key="index2">
                     <a href="javascript:;" @click="fill(index2)"
-                      :class="{ 'border': index == index2 && currentType == 2, 'bg': fillAnswer[index2][3] == true }"><span
+                       :class="{ 'border': index == index2 && currentType == 2, 'bg': fillAnswer[index2][3] == true }"><span
                         :class="{ 'mark': topic[2][index2].isMark == true }"></span>{{ list.id }}</a>
                   </li>
                 </ul>
@@ -66,7 +66,7 @@
                 <ul>
                   <li v-for="(list, index3) in topic[3]" :key="index3">
                     <a href="javascript:;" @click="judge(index3)"
-                      :class="{ 'border': index == index3 && currentType == 3, 'bg': bg_flag && topic[3][index3].isClick == true }"><span
+                       :class="{ 'border': index == index3 && currentType == 3, 'bg': bg_flag && topic[3][index3].isClick == true }"><span
                         :class="{ 'mark': topic[3][index3].isMark == true }"></span>{{ list.id }}</a>
                   </li>
                 </ul>

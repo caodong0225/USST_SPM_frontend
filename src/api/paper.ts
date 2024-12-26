@@ -1,10 +1,35 @@
 import request from '../utils/request';
 
-export const getPapers = (id: string) => {
-    return request({
-        url: `/paper/${id}/list`,
-        method: 'get',
-    });
+interface Paper {
+    id: number
+    createdAt: string
+    updatedAt: string
+    paperName: string
+    paperDesc: string
+    paperStartTime: string
+    paperEndTime: string
+    status: string
+    visible: boolean
+    courseId: number
+}
+
+interface PaperWithQuestions {
+    papers: Paper
+    questionsNum: number
+}
+
+interface PaperResponse {
+    code: number
+    message: string
+    data: PaperWithQuestions[]
+}
+
+export const getPapers = (courseId: string | number) => {
+    console.log('调用获取试卷列表接口，courseId:', courseId)
+    return request<PaperResponse>({
+        url: `/paper/${courseId}/list`,
+        method: 'get'
+    })
 }
 
 export const createPaper = (data: any) => {

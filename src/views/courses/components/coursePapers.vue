@@ -1,5 +1,66 @@
 <template>
   <div class="papers-container">
+    <div class="stats-cards">
+      <el-row :gutter="20">
+        <el-col :span="6">
+          <el-card shadow="hover" class="stat-card">
+            <template #header>
+              <div class="stat-header">
+                <el-icon><Document /></el-icon>
+                <span>总测验数</span>
+              </div>
+            </template>
+            <div class="stat-content">
+              <span class="stat-number">{{ papers.length }}</span>
+              <span class="stat-label">个测验</span>
+            </div>
+          </el-card>
+        </el-col>
+        <el-col :span="6">
+          <el-card shadow="hover" class="stat-card active">
+            <template #header>
+              <div class="stat-header">
+                <el-icon><Timer /></el-icon>
+                <span>进行中</span>
+              </div>
+            </template>
+            <div class="stat-content">
+              <span class="stat-number">{{ getStatusCount('active') }}</span>
+              <span class="stat-label">个测验</span>
+            </div>
+          </el-card>
+        </el-col>
+        <el-col :span="6">
+          <el-card shadow="hover" class="stat-card upcoming">
+            <template #header>
+              <div class="stat-header">
+                <el-icon><Calendar /></el-icon>
+                <span>即将开始</span>
+              </div>
+            </template>
+            <div class="stat-content">
+              <span class="stat-number">{{ getStatusCount('upcoming') }}</span>
+              <span class="stat-label">个测验</span>
+            </div>
+          </el-card>
+        </el-col>
+        <el-col :span="6">
+          <el-card shadow="hover" class="stat-card ended">
+            <template #header>
+              <div class="stat-header">
+                <el-icon><Check /></el-icon>
+                <span>已结束</span>
+              </div>
+            </template>
+            <div class="stat-content">
+              <span class="stat-number">{{ getStatusCount('ended') }}</span>
+              <span class="stat-label">个测验</span>
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
+    </div>
+
     <el-card class="papers-card">
       <template #header>
         <div class="card-header">
@@ -26,16 +87,16 @@
 
       <!-- 测验列表 -->
       <div class="papers-list" v-loading="loading">
-        <el-empty v-if="!tableData.length" description="暂无测验">
+        <el-empty v-if="!papers.length" description="暂无测验">
           <template #extra>
             <el-button type="primary" @click="showAddPaper = true" v-if="isAdmin">
               创建第一个测验
             </el-button>
-          </template>
+        </template>
         </el-empty>
 
         <div v-else class="paper-items">
-          <div v-for="paper in displayedPapers" :key="paper.id" class="paper-item">
+          <div v-for="paper in papers" :key="paper.id" class="paper-item">
             <div class="paper-status" :class="paper.status">
               {{ getStatusText(paper.status) }}
             </div>
@@ -57,15 +118,51 @@
                 </div>
                 <div class="meta-item">
                   <el-icon>
+                    <Stopwatch />
+                  </el-icon>
+                  <span>时长: {{ paper.duration }}分钟</span>
+                </div>
+                <div class="meta-item">
+                  <el-icon>
                     <Collection />
                   </el-icon>
                   <span>{{ paper.questionsNum }}道题目</span>
                 </div>
                 <div class="meta-item">
                   <el-icon>
-                    <User />
+                    <Trophy />
                   </el-icon>
-                  <span>{{ paper.submitCount || 0 }}人已提交</span>
+                  <span>总分: {{ paper.totalScore }}分</span>
+                </div>
+              </div>
+
+              <div class="exam-settings">
+                <div class="settings-item" v-if="paper.examMode === 'realtime'">
+                  <el-tag size="small" type="success">实时考试</el-tag>
+                </div>
+                <div class="settings-item" v-else>
+                  <el-tag size="small" type="warning">限时考试</el-tag>
+                </div>
+                <div class="settings-item" v-if="paper.examOptions.includes('randomOrder')">
+                  <el-tag size="small" type="info">随机顺序</el-tag>
+                </div>
+                <div class="settings-item" v-if="paper.examOptions.includes('showResult')">
+                  <el-tag size="small" type="info">即时成绩</el-tag>
+                </div>
+              </div>
+
+              <div class="paper-stats" v-if="paper.status === 'ended'">
+                <div class="stats-item">
+                  <span class="label">提交人数</span>
+                  <span class="value">{{ paper.submitCount }}</span>
+                </div>
+                <div class="stats-item">
+                  <span class="label">平均分</span>
+                  <span class="value">{{ paper.averageScore.toFixed(1) }}</span>
+                </div>
+                <div class="stats-item">
+                  <span class="label">及格线</span>
+                  <span class="value">{{ paper.passScore }}</span>
                 </div>
               </div>
             </div>
@@ -73,44 +170,27 @@
               <el-button type="primary" @click="handleEntry(paper)">
                 {{ getPaperActionText(paper.status) }}
               </el-button>
-              <el-dropdown v-if="isAdmin" trigger="click">
-                <el-button>
-                  <el-icon>
-                    <More />
-                  </el-icon>
-                </el-button>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item @click="handleEdit(paper)">
-                      <el-icon>
-                        <Edit />
-                      </el-icon>编辑试题
-                    </el-dropdown-item>
-                    <el-dropdown-item @click="handleStats(paper)">
-                      <el-icon>
-                        <DataLine />
-                      </el-icon>统计分析
-                    </el-dropdown-item>
-                    <el-dropdown-item divided danger @click="handleDelete(paper)">
-                      <el-icon>
-                        <Delete />
-                      </el-icon>删除测验
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
+              <el-button type="info" @click="handleEdit(paper)" v-if="isAdmin">
+                <el-icon><Edit /></el-icon>编辑试题
+              </el-button>
+              <el-button type="warning" @click="handleStats(paper)" v-if="isAdmin">
+                <el-icon><DataLine /></el-icon>统计分析
+              </el-button>
+              <el-button type="danger" @click="handleDelete(paper)" v-if="isAdmin">
+                <el-icon><Delete /></el-icon>删除测验
+              </el-button>
             </div>
           </div>
         </div>
 
         <!-- 分页控件 -->
         <div class="pagination-wrapper">
-          <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="tableData.length"
+          <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="papers.length"
             :page-sizes="[5, 10, 15, 20]" layout="total, sizes, prev, pager, next" @size-change="handleSizeChange"
             @current-change="handleCurrentChange" />
         </div>
       </div>
-    </el-card>
+  </el-card>
 
     <!-- 添加测验抽屉 -->
     <el-drawer v-model="showAddPaper" title="新建测验" size="500px" :close-on-click-modal="false">
@@ -120,12 +200,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 import { useUserInfoStore } from '@/store'
-import { deletePaper } from '@/api/paper'
+import { deletePaper, getPapers } from '@/api/paper'
 import CreatePaper from './addPaper.vue'
 
 // 将 mockPapers 移动到 props 定义之前
@@ -181,8 +261,46 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 
 // 使用计算属性来合并默认数据和传入的数据
-const displayedPapers = computed(() => {
-  return props.tableData.length > 0 ? props.tableData : mockPapers
+const papers = ref([])
+
+// 获取试卷列表
+const fetchPapers = async () => {
+  loading.value = true
+  try {
+    console.log('组件内获取试卷列表，courseId:', props.courseId)
+    const res = await getPapers(props.courseId)
+    console.log('获取试卷列表响应:', res)
+    if (res.code === 200) {
+      papers.value = res.data.map((item: any) => ({
+        id: item.papers.id,
+        paperName: item.papers.paperName,
+        paperDescription: item.papers.paperDesc,
+        paperStartTime: item.papers.paperStartTime,
+        paperEndTime: item.papers.paperEndTime,
+        status: item.papers.status,
+        visible: item.papers.visible,
+        courseId: item.papers.courseId,
+        questionsNum: item.questionsNum,
+        examMode: 'realtime',
+        duration: 90,
+        totalScore: 100,
+        passScore: 60,
+        examOptions: ['showResult'],
+        examNotes: '请认真作答，注意时间',
+        submitCount: 0,
+        averageScore: 0
+      }))
+    }
+  } catch (error) {
+    console.error('获取试卷列表失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  console.log('组件挂载，准备获取试卷列表')
+  fetchPapers()
 })
 
 // 获取状态文本
@@ -229,7 +347,7 @@ const handleEntry = (paper: any) => {
       // 跳转到答题页面
       break
     case 'ended':
-      // 跳转到结果页面
+      // 跳到结果页面
       break
   }
 }
@@ -258,10 +376,16 @@ const handleDelete = async (paper: any) => {
     const res = await deletePaper(paper.id)
     if (res.code === 200) {
       ElMessage.success('删除成功')
-      // 重新加载列表
+      // 立即刷新列表
+      await fetchPapers()
+    } else {
+      ElMessage.error(res.message || '删除失败')
     }
   } catch (error) {
-    console.error('删除失败:', error)
+    if (error !== 'cancel') {
+      console.error('删除失败:', error)
+          ElMessage.error('删除失败')
+        }
   } finally {
     loading.value = false
   }
@@ -271,6 +395,11 @@ const handleDelete = async (paper: any) => {
 const onPaperCreated = () => {
   showAddPaper.value = false
   // 重新加载列表
+}
+
+// 获取状态数量统计
+const getStatusCount = (status: string) => {
+  return papers.value.filter(paper => paper.status === status).length
 }
 </script>
 
@@ -381,8 +510,18 @@ const onPaperCreated = () => {
 .paper-actions {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 8px;
+  min-width: 120px;
+}
+
+.paper-actions .el-button {
+  width: 100%;
   justify-content: center;
+  margin-left: 0;
+}
+
+.paper-actions .el-button .el-icon {
+  margin-right: 4px;
 }
 
 .pagination-wrapper {
@@ -408,11 +547,236 @@ const onPaperCreated = () => {
 
   .paper-actions {
     flex-direction: row;
-    justify-content: flex-end;
+    flex-wrap: wrap;
+    min-width: auto;
+  }
+
+  .paper-actions .el-button {
+    flex: 1;
+    min-width: 120px;
   }
 
   .paper-meta {
     gap: 1rem;
+  }
+}
+
+.exam-settings {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.paper-stats {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+
+.stats-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stats-item .label {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
+
+.stats-item .value {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--el-text-color-primary);
+}
+
+/* 统计卡片样式优化 */
+.stats-cards {
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--el-box-shadow-light);
+}
+
+.stat-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--el-text-color-regular);
+}
+
+.stat-content {
+  text-align: center;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-number {
+  font-size: 32px;
+  font-weight: 600;
+  background: linear-gradient(45deg, var(--el-color-primary), var(--el-color-primary-light-3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 4px;
+}
+
+/* 试卷卡片样式优化 */
+.paper-item {
+  border: 1px solid var(--el-border-color-lighter);
+  box-shadow: var(--el-box-shadow-lighter);
+  background: var(--el-bg-color);
+}
+
+.paper-item:hover {
+  border-color: var(--el-color-primary-light-5);
+  box-shadow: var(--el-box-shadow-light);
+}
+
+/* 状态标签样式优化 */
+.paper-status {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(8px);
+}
+
+/* 试卷内容布局优化 */
+.paper-content {
+  padding: 0 20px;
+}
+
+.paper-title {
+  color: var(--el-text-color-primary);
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.paper-desc {
+  line-height: 1.6;
+}
+
+/* 元信息样式优化 */
+.paper-meta {
+  background: var(--el-fill-color-light);
+  padding: 12px;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.meta-item {
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.meta-item:hover {
+  background: var(--el-fill-color);
+}
+
+/* 考试设置标签优化 */
+.exam-settings {
+  margin: 16px 0;
+  padding: 12px;
+  background: var(--el-fill-color-lighter);
+  border-radius: 8px;
+}
+
+.settings-item {
+  margin-right: 8px;
+}
+
+/* 统计信息样式优化 */
+.paper-stats {
+  background: var(--el-fill-color-lighter);
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.stats-item {
+  padding: 8px 16px;
+  background: var(--el-bg-color);
+  border-radius: 6px;
+  min-width: 100px;
+}
+
+.stats-item .value {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--el-color-primary);
+}
+
+/* 操作按钮样式优化 */
+.paper-actions {
+  padding: 16px;
+  background: var(--el-fill-color-light);
+  border-radius: 8px;
+  align-self: stretch;
+}
+
+/* 分页控件样式优化 */
+.pagination-wrapper {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .stats-cards .el-col {
+    margin-bottom: 16px;
+  }
+
+  .paper-item {
+    padding: 16px;
+  }
+
+  .paper-content {
+    padding: 0;
+  }
+
+  .paper-meta {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .meta-item {
+    flex: 1;
+    min-width: 140px;
+    justify-content: center;
+  }
+
+  .paper-stats {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .stats-item {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+  }
+}
+
+/* 深色模式适配 */
+:root[data-theme='dark'] {
+  .stat-number {
+    background: linear-gradient(45deg, var(--el-color-primary-light-3), var(--el-color-primary-light-5));
+    -webkit-background-clip: text;
+  }
+
+  .paper-item {
+    background: var(--el-bg-color-overlay);
   }
 }
 </style>

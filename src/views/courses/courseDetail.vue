@@ -9,21 +9,15 @@
             <h1 class="course-title">{{ courseInfo?.course.courseName }}</h1>
             <div class="course-meta">
               <div class="meta-item">
-                <el-icon>
-                  <Calendar />
-                </el-icon>
+                <el-icon><Calendar /></el-icon>
                 <span>{{ formatDate(courseInfo?.course.startTime) }} 开课</span>
               </div>
               <div class="meta-item">
-                <el-icon>
-                  <User />
-                </el-icon>
+                <el-icon><User /></el-icon>
                 <span>{{ courseInfo?.studentCount || 0 }} 名学生</span>
               </div>
               <div class="meta-item">
-                <el-icon>
-                  <UserFilled />
-                </el-icon>
+                <el-icon><UserFilled /></el-icon>
                 <span>{{ courseInfo?.teacher.nickname }}</span>
               </div>
             </div>
@@ -35,24 +29,16 @@
       <div class="course-nav">
         <el-menu mode="horizontal" :default-active="activeTab" @select="handleTabChange">
           <el-menu-item index="info">
-            <el-icon>
-              <InfoFilled />
-            </el-icon>课程信息
+            <el-icon><InfoFilled /></el-icon>课程信息
           </el-menu-item>
           <el-menu-item index="announcement">
-            <el-icon>
-              <Bell />
-            </el-icon>课程公告
+            <el-icon><Bell /></el-icon>课程公告
           </el-menu-item>
           <el-menu-item index="papers">
-            <el-icon>
-              <Document />
-            </el-icon>课程测验
+            <el-icon><Document /></el-icon>课程测验
           </el-menu-item>
           <el-menu-item index="students">
-            <el-icon>
-              <User />
-            </el-icon>班级成员
+            <el-icon><User /></el-icon>班级成员
           </el-menu-item>
         </el-menu>
       </div>
@@ -70,6 +56,15 @@
 
         <!-- 班级成员 -->
         <Students v-if="activeTab === 'students'" :course-id="courseId" />
+
+        <!-- 添加试卷 -->
+        <AddPaper 
+          v-if="showAddPaper"
+          :course-id="courseId"
+          @success="handlePaperSuccess"
+          @refresh="fetchPapers"
+          @cancel="showAddPaper = false"
+        />
       </div>
     </div>
   </PageLayout>
@@ -80,18 +75,20 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getCourseDetail } from '@/api/course'
 import { getPapers } from '@/api/paper'
-import dayjs from 'dayjs'
-
+import { formatDate } from '@/utils/date'
+import PageLayout from '@/components/layout/PageLayout.vue'
 import CourseInformation from './components/courseInfo.vue'
 import TableWithPagination from './components/coursePapers.vue'
 import CreateAnnouncement from './components/createAnnouncement.vue'
 import Students from './components/students.vue'
+import AddPaper from './components/addPaper.vue'
 
 const route = useRoute()
 const courseId = route.params.id as string
 const courseInfo = ref<any>(null)
 const paperInfo = ref<any[]>([])
 const activeTab = ref('info')
+const showAddPaper = ref(false)
 
 // 获取课程详情
 const fetchCourseDetail = async () => {
@@ -106,8 +103,10 @@ const fetchCourseDetail = async () => {
 // 获取试卷列表
 const fetchPapers = async () => {
   try {
-    const { data } = await getPapers(courseId)
-    paperInfo.value = data
+    const res = await getPapers(courseId)
+    if (res.code === 200) {
+      paperInfo.value = res.data
+    }
   } catch (error) {
     console.error('获取试卷列表失败:', error)
   }
@@ -116,11 +115,17 @@ const fetchPapers = async () => {
 // 处理标签切换
 const handleTabChange = (tab: string) => {
   activeTab.value = tab
+  // 当切换到试卷标签时获取试卷列表
+  if (tab === 'papers') {
+    console.log('正在获取课程ID为', courseId, '的试卷列表') // 添加日志
+    fetchPapers()
+  }
 }
 
-// 格式化日期
-const formatDate = (date: string) => {
-  return date ? dayjs(date).format('YYYY-MM-DD') : ''
+// 处理试卷创建成功
+const handlePaperSuccess = () => {
+  showAddPaper.value = false
+  fetchPapers() // 重新获取试卷列表
 }
 
 onMounted(() => {

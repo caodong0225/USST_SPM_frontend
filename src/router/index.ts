@@ -78,6 +78,7 @@ const router = createRouter({
                         title: '我创建的课程'
                     }
                 }
+
             ]
         },
         {
